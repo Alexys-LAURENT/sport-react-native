@@ -10,6 +10,7 @@ import {
 } from 'react-native-heroicons/solid';
 
 import {
+  BeakerIcon,
   ChartBarIcon,
   QueueListIcon,
   UserCircleIcon
@@ -24,7 +25,8 @@ const MAPPING = {
   'chevron.right': ChevronRightIcon,
   'list.bullet': QueueListIcon,
   'chart.bar': ChartBarIcon,
-  'person.crop.circle': UserCircleIcon
+  'person.crop.circle': UserCircleIcon,
+  'testtube.2': BeakerIcon,
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
