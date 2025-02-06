@@ -4,7 +4,7 @@ import MapViewDirections from 'react-native-maps-directions';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAwSanwbPTRicnx1GVLdEoW248-9BuRL9g';
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY!;
 
 const waypoints = [
     { latitude: 48.88506238544102, longitude: 2.2937863020516205 },
