@@ -1,32 +1,11 @@
-import React, { useState, useRef, useMemo } from 'react';
+import { ThemedText } from '@/components/ThemedText';
+import Constants from 'expo-constants';
+import React, { useMemo, useRef, useState } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import MapView, { MapStyleElement, Marker, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY!;
-
-const waypoints = [
-    { latitude: 48.88506238544102, longitude: 2.2937863020516205 },
-    { latitude: 48.88538434872261, longitude: 2.2934576488620286 },
-    { latitude: 48.88558121910085, longitude: 2.2919295900476784 },
-    { latitude: 48.88409964630183, longitude: 2.2936645282387573 },
-    { latitude: 48.883701541073485, longitude: 2.292893127443799 },
-    { latitude: 48.88316299985647, longitude: 2.293500979104329 },
-    { latitude: 48.88395356065056, longitude: 2.29500221168141 },
-    { latitude: 48.88378804228189, longitude: 2.29543769512154 },
-    { latitude: 48.88455774382171, longitude: 2.296793274496834 },
-    { latitude: 48.88447222201324, longitude: 2.297063390013933 },
-    { latitude: 48.88448537922407, longitude: 2.2976686487017948 },
-    { latitude: 48.88455774382155, longitude: 2.2978737363563595 },
-    { latitude: 48.88495245796466, longitude: 2.2981538560796673 },
-    { latitude: 48.885156392384644, longitude: 2.2980888282867564 },
-    { latitude: 48.88532414427568, longitude: 2.2984339758374284 },
-    { latitude: 48.88521559900704, longitude: 2.3030209364595566 },
-    { latitude: 48.88539321842041, longitude: 2.302955908666646 },
-    { latitude: 48.8865181267346, longitude: 2.3014852800933028 },
-    { latitude: 48.886597066717854, longitude: 2.3017603976786947 },
-];
+const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
 
 const darkMapStyle: MapStyleElement[] = [
     {
@@ -110,13 +89,28 @@ const darkMapStyle: MapStyleElement[] = [
     }
 ];
 
-export function Map({ isRealTime, idTraining }: { isRealTime: boolean; idTraining: number }) {
+export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: boolean; waypoints: { latitude: number; longitude: number }[], showTotalDistance?: boolean }) {
     const [totalDistance, setTotalDistance] = useState(0);
     const mapRef = useRef<MapView>(null);
     const distancesRef = useRef<{ [key: number]: number }>({});
 
     // Calcul des limites de la carte et de la région optimale
     const mapSettings = useMemo(() => {
+        // Si waypoints est vide, retournez une valeur par défaut
+        if (!waypoints || waypoints.length === 0) {
+            return {
+                optimalRegion: {
+                    latitude: 48.8566, // Coordonnées par défaut (Paris)
+                    longitude: 2.3522,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                },
+                maxAllowedDelta: 0.1,
+                center: { latitude: 48.8566, longitude: 2.3522 },
+                distanceThreshold: 0.1,
+            };
+        }
+
         const latitudes = waypoints.map(wp => wp.latitude);
         const longitudes = waypoints.map(wp => wp.longitude);
 
@@ -150,7 +144,7 @@ export function Map({ isRealTime, idTraining }: { isRealTime: boolean; idTrainin
             center: { latitude: centerLat, longitude: centerLng },
             distanceThreshold: Math.max(maxLat - minLat, maxLng - minLng) * 1.5, // 150% de la taille du trajet
         };
-    }, []);
+    }, [waypoints]);
 
     const handleRegionChange = (region: Region) => {
         const { optimalRegion, center, maxAllowedDelta, distanceThreshold } = mapSettings;
@@ -172,6 +166,15 @@ export function Map({ isRealTime, idTraining }: { isRealTime: boolean; idTrainin
         const total = Object.values(distancesRef.current).reduce((acc, curr) => acc + curr, 0);
         setTotalDistance(total);
     };
+
+    // Vérifiez que waypoints a des données
+    if (!waypoints || waypoints.length < 2) {
+        return (
+            <View style={[styles.container, styles.loadingContainer]}>
+                <ThemedText style={styles.loadingText}>Pas de données de parcours disponibles</ThemedText>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -217,19 +220,30 @@ export function Map({ isRealTime, idTraining }: { isRealTime: boolean; idTrainin
                 ))}
             </MapView>
 
-            <View style={styles.distanceOverlay}>
-                <ThemedText style={styles.distanceText}>
-                    Distance totale: {totalDistance.toFixed(2)} km
-                </ThemedText>
-            </View>
+            {showTotalDistance && 
+                <View style={styles.distanceOverlay}>
+                    <ThemedText style={styles.distanceText}>
+                        Distance totale: {totalDistance.toFixed(2)} km
+                    </ThemedText>
+                </View>
+            }
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        height: 250,
         backgroundColor: '#000',
+    },
+    loadingContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#fff',
     },
     map: {
         width: '100%',

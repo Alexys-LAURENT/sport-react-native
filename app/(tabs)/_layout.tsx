@@ -36,7 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="trainings"
         options={{
-          title: 'Entraienements',
+          title: 'Entrainements',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
         }}
       />
