@@ -1,7 +1,7 @@
 import { Training } from '@/types/entities';
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import TrainingItem from './TrainingItem'; // Composant pour afficher un entraînement
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
@@ -34,7 +34,7 @@ const TrainingList = () => {
     }
 
     return (
-        <View style={{width: '100%', display: 'flex', flexDirection: 'column', gap: 16}}>
+        <ScrollView style={{width:'100%'}} contentContainerStyle={{width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {
                 trainings.length > 0 ? (
                     trainings.map((training) => (
@@ -46,7 +46,7 @@ const TrainingList = () => {
                     </View>
                 )
             }
-        </View>
+        </ScrollView>
     );
 };
 
