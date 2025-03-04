@@ -1,6 +1,7 @@
 import ParallaxScrollViewNoimage from "@/components/ParallaxScrollViewNoImage";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
 
 
@@ -10,6 +11,7 @@ export default function TrainingsScreen() {
         {/* Title */}
         <ThemedText style={styles.titleContainer} type="title">Vos derniers entrainements 💪</ThemedText>
         
+        <Link href="../training/1">View first user details</Link>
         {/* Scroll de la liste des entrainements */}
         <ParallaxScrollViewNoimage headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}>
             
