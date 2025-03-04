@@ -32,7 +32,6 @@ export default function TrainingScreen() {
             try {
                 const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);
                 const data = await response.json();
-                console.log('data', data);
                 setTraining(data.trainingInfo);
                 setWaypoints(data.waypoints);
             } catch (error) {
