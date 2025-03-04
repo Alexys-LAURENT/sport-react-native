@@ -18,7 +18,8 @@ const TrainingItem = ({ training }:{training:Training}) => {
     }
 
     return (
-        <Link href={`/training/${training.idTraining}`} style={[styles.container, {
+        <Link href={`/training/${training.idTraining}`}>
+        <View style={[styles.container, {
             borderColor: training.endedDate ? 'rgba(255, 255, 255, 0.1)' : '#C6FF00'
         }]}>
             <View style={{display: 'flex', flexDirection: 'column', gap: 8}}>
@@ -41,6 +42,7 @@ const TrainingItem = ({ training }:{training:Training}) => {
                     )
                 }
             </View>
+        </View>
         </Link>
     );
 };
