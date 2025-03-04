@@ -1,10 +1,8 @@
 import { Map } from '@/components/map/Map';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import Constants from 'expo-constants';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 
 interface Training {
@@ -17,6 +15,8 @@ interface Training {
     idTrainingType: number;
     idUser: number;
     startedDate: string;
+    icon: string;
+    label: string;
 }
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -32,6 +32,7 @@ export default function TrainingScreen() {
             try {
                 const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);
                 const data = await response.json();
+                console.log('data', data);
                 setTraining(data.trainingInfo);
                 setWaypoints(data.waypoints);
             } catch (error) {
@@ -40,76 +41,83 @@ export default function TrainingScreen() {
                 setLoading(false);
             }
         };
-        
+
         fetchData();
     }
-    , [id_training]);
+        , [id_training]);
 
-  return training && waypoints && !loading && (
-    <ThemedView style={styles.container}>
-        <Map isRealTime={false} waypoints={waypoints} />
-        <ThemedView style={styles.infosContainer}>
-            <ThemedText style={styles.title}>
-                Entrainement du {new Date(training.startedDate).toLocaleDateString()}
-            </ThemedText>
-            <ThemedText>
-                Type d'entrainement: {training.idTrainingType}
-            </ThemedText>
-            <ThemedText>
-                Durée: {(() => {
-                    const start = new Date(training.startedDate);
-                    const end = new Date(training.endedDate);
-                    const diffMs = end.getTime() - start.getTime();
-                    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                    return `${hours.toString().padStart(2, '0')} h ${minutes.toString().padStart(2, '0')} min`;
-                })()}
-            </ThemedText>
-            <ThemedText>
-                Kcal dépensées: {training.calories} kcal
-            </ThemedText>
-            <ThemedText>
-                Difficulté: {training.difficulty}
-            </ThemedText>
-            <ThemedText>
-                Distance parcourue: {training.distance ? training.distance.toFixed(2) + 'km' : null }
-            </ThemedText>
-            <ThemedText>
-                Votre ressenti:
-            </ThemedText>
-            <ThemedView style={styles.feelingContainer}>
-                <ThemedText style={styles.feelingText}>
-                    {training.feeling}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </ThemedText>
-            </ThemedView>
-        </ThemedView>
-    </ThemedView>
-  );
+    return loading ? (
+        <View style={{ flex: 1, paddingTop: 50, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+    ) :
+        training && waypoints && (
+            <ScrollView contentContainerStyle={styles.container}>
+                <Map isRealTime={false} waypoints={waypoints} />
+                <View style={styles.infosContainer}>
+                    <Text style={styles.title}>
+                        Entrainement du {new Date(training.startedDate).toLocaleDateString()}
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        {training.icon} <Text style={{ fontWeight: '700' }}>Type d'entrainement:</Text> {training.label.slice(0, 1).toUpperCase() + training.label.slice(1).toLowerCase()}
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        ⏲️ <Text style={{ fontWeight: '700' }}>Durée :</Text> {(() => {
+                            const start = new Date(training.startedDate);
+                            const end = new Date(training.endedDate);
+                            const diffMs = end.getTime() - start.getTime();
+                            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                            return `${hours.toString().padStart(2, '0')} h ${minutes.toString().padStart(2, '0')} min`;
+                        })()}
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        🔥 <Text style={{ fontWeight: '700' }}>Kcal dépensées :</Text> {training.calories} kcal
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        ⚡ <Text style={{ fontWeight: '700' }}>Difficulté :</Text> {training.difficulty.slice(0, 1).toUpperCase() + training.difficulty.slice(1).toLowerCase()}
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        🗺️ <Text style={{ fontWeight: '700' }}>Distance parcourue :</Text> {training.distance ? training.distance.toFixed(2) + 'km' : null}
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        ❔ <Text style={{ fontWeight: '700' }}>Votre ressenti :</Text>
+                    </Text>
+                    <View style={styles.feelingContainer}>
+                        <Text style={styles.feelingText}>
+                            {training.feeling}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </Text>
+                    </View>
+                </View>
+            </ScrollView>
+        );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        paddingBottom: 80,
     },
     infosContainer: {
         padding: 20,
         display: 'flex',
         flexDirection: 'column',
-        gap: 10,
+        gap: 20,
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
         paddingBottom: 25,
+        color: 'white'
     },
     feelingContainer: {
         padding: 10,
         backgroundColor: '#1e2021',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor : '#343637',
+        borderColor: '#343637',
     },
     feelingText: {
         fontSize: 14,
+        color: 'white'
     },
 });

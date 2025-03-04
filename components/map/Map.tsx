@@ -168,7 +168,7 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
     };
 
     // Vérifiez que waypoints a des données
-    if (!waypoints || waypoints.length < 2) {
+    if (!waypoints || waypoints.length < 1) {
         return (
             <View style={[styles.container, styles.loadingContainer]}>
                 <ThemedText style={styles.loadingText}>Pas de données de parcours disponibles</ThemedText>
@@ -220,7 +220,7 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
                 ))}
             </MapView>
 
-            {showTotalDistance && 
+            {showTotalDistance &&
                 <View style={styles.distanceOverlay}>
                     <ThemedText style={styles.distanceText}>
                         Distance totale: {totalDistance.toFixed(2)} km
