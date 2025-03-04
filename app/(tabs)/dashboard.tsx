@@ -1,12 +1,13 @@
 import { ThemedView } from "@/components/ThemedView";
 import dayjs, { Dayjs } from "dayjs";
+import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { LineChart, PieChart } from "react-native-gifted-charts";
-const API_URL = 'http://10.0.222.83:8080'
+
 // TODO : change this to the current user id
 const ID_USER = 1
-
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 type CountTrainingsTypes = {
   type: string;
   count: number;
@@ -65,7 +66,7 @@ export default function DashboardScreen() {
           return
         }
         
-        const res =  await fetch(API_URL+`/api/dashboard/${ID_USER}/${month+1}/${year}`)
+        const res =  await fetch(API_URL+`api/dashboard/${ID_USER}/${month+1}/${year}`)
         
         const data = await res.json()
 

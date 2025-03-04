@@ -1,10 +1,9 @@
 import ParallaxScrollViewNoimage from "@/components/ParallaxScrollViewNoImage";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Link } from "expo-router";
-import { StyleSheet } from "react-native";
-import React from "react";
 import TrainingList from "@/components/TrainingList";
+import React from "react";
+import { StyleSheet } from "react-native";
 
 
 export default function TrainingsScreen() {

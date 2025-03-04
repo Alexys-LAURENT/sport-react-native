@@ -1,26 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, ActivityIndicator } from 'react-native';
+import { Training } from '@/types/entities';
+import Constants from 'expo-constants';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 import TrainingItem from './TrainingItem'; // Composant pour afficher un entraînement
 
-const API_URL = 'http://127.0.0.1:8080/api/trainings/'; // Remplace par l'URL de ton API
-type training = {
-    idTraining : number,
-    date : string,
-    calories : number,
-    icon: string,
-    label: string
-}
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+// TODO : change this to the current user id
+const ID_USER = 1
+
 const TrainingList = () => {
-    const [trainings, setTrainings] = useState<training[]>([]); // Stocke les entraînements
+    const [trainings, setTrainings] = useState<Training[]>([]); // Stocke les entraînements
     const [loading, setLoading] = useState(true); // Gère le chargement
 
     useEffect(() => {
         const fetchTrainings = async () => {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL+`api/trainings/${ID_USER}`);
                 const data = await response.json();
-                console.log();
-                setTrainings(data);
+                console.log(data);
+                setTrainings(data.trainings);
             } catch (error) {
                 console.error('Erreur lors de la récupération des entraînements:', error);
             } finally {
@@ -36,12 +34,18 @@ const TrainingList = () => {
     }
 
     return (
-        <View>
-            <FlatList
-                data={trainings}
-                keyExtractor={(item) => item.idTraining.toString()}
-                renderItem={({ item }) => <TrainingItem training={item} />}
-            />
+        <View style={{width: '100%', display: 'flex', flexDirection: 'column', gap: 16}}>
+            {
+                trainings.length > 0 ? (
+                    trainings.map((training) => (
+                        <TrainingItem key={training.idTraining} training={training} />
+                    ))
+                ) : (
+                    <View>
+                        <Text>Aucun entraînement</Text>
+                    </View>
+                )
+            }
         </View>
     );
 };

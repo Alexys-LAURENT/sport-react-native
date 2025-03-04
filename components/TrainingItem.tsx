@@ -1,105 +1,62 @@
+import { Training } from '@/types/entities';
+import dayjs from 'dayjs';
+import { Link } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-const TrainingItem = ({ training }) => {
-    const { idTraining, startedDate, endedDate, duration, calories } = training;
-    const status = endedDate ? 'completed' : 'in_progress';
 
+const TrainingItem = ({ training }:{training:Training}) => {
+    console.log(training);
+    
+    const getDuration = (startedDate: string, endedDate: string) => {
+        const started = dayjs(startedDate);
+        const ended = dayjs(endedDate);
+        const duration = ended.diff(started);
+        const minutes = Math.floor(duration / 60000);
+        const seconds = ((duration % 60000) / 1000).toFixed(0);
+        return `${minutes} min ${seconds} sec`;
+    }
 
     return (
-        <View style={[
-            styles.container,
-            status === 'in_progress' && styles.activeContainer
-        ]}>
-            <View style={styles.row}>
-                <View style={styles.leftContent}>
-                    <View style={styles.iconTextRow}>
-                        <Text style={styles.icon}>🚴‍♂️</Text>
-                        <Text style={styles.title}>Vélo</Text>
-                    </View>
-
-                    <View style={styles.detailsRow}>
-                        {status === 'in_progress' ? (
-                            <Text style={styles.statusText}>En cours</Text>
-                        ) : (
-                            <Text style={styles.duration}>{getDuration()}</Text>
-                        )}
-                        <Text style={styles.date}>
-                            {new Date(startedDate).toLocaleDateString()}
-                        </Text>
-                    </View>
+        <Link href={`/training/${training.idTraining}`} style={[styles.container, {
+            borderColor: training.endedDate ? 'rgba(255, 255, 255, 0.1)' : '#C6FF00'
+        }]}>
+            <View style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                <View>
+                    <Text style={{color:'#D9D9D9', fontSize : 20}}>{training.icon} {training.label}</Text>
                 </View>
-
-                <View style={styles.rightContent}>
-                    {status === 'in_progress' ? (
-                        <Text style={styles.statusText}>En cours</Text>
-                    ) : (
-                        <Text style={styles.calories}>{calories} Kcal</Text>
-                    )}
+                <View style={{display: 'flex', flexDirection: 'row', gap: 8}}>
+                    <Text style={{color:'#D9D9D9', fontSize : 13}}>{dayjs(training.startedDate).format('DD/MM/YYYY')}</Text>
+                   {
+                    training.endedDate && <Text style={{color:'#D9D9D9', fontSize : 13}}>{getDuration(training.startedDate, training.endedDate)}</Text>
+                   }
                 </View>
             </View>
-        </View>
+            <View>
+                {
+                    training.endedDate ? (
+                        <Text style={{color:'#D9D9D9'}}>{training.calories} Kcal</Text>
+                    ) : (
+                        <Text style={{color:'#C6FF00'}}>En cours</Text>
+                    )
+                }
+            </View>
+        </Link>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#1C1C1E',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 8,
-    },
-    activeContainer: {
-        backgroundColor: '#1C1C1E',
-        borderWidth: 1,
-        borderColor: '#4CAF50',
-    },
-    row: {
+    container : {
+        display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-    },
-    leftContent: {
-        flex: 1,
-    },
-    iconTextRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    icon: {
-        fontSize: 16,
-        marginRight: 8,
-    },
-    title: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    detailsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    duration: {
-        color: '#8E8E93',
-        fontSize: 14,
-        marginRight: 8,
-    },
-    date: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    rightContent: {
-        alignItems: 'flex-end',
-    },
-    statusText: {
-        color: '#4CAF50',
-        fontWeight: '600',
-    },
-    calories: {
-        color: '#FFFFFF',
-        fontSize: 18,
-        fontWeight: '600',
+        width: '100%',
+        padding: 16,
+        backgroundColor: '#1E2021',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
 });
 

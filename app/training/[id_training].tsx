@@ -1,6 +1,7 @@
 import { Map } from '@/components/map/Map';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Constants from 'expo-constants';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
@@ -17,6 +18,8 @@ interface Training {
     idUser: number;
     startedDate: string;
 }
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
 
 export default function TrainingScreen() {
     const { id_training } = useLocalSearchParams<{ id_training: string }>();
@@ -27,7 +30,7 @@ export default function TrainingScreen() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://192.168.1.35:8080/api/trainingPage/getTrainingInfoById/${trainingId}`);
+                const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);
                 const data = await response.json();
                 setTraining(data.trainingInfo);
                 setWaypoints(data.waypoints);
@@ -69,7 +72,7 @@ export default function TrainingScreen() {
                 Difficulté: {training.difficulty}
             </ThemedText>
             <ThemedText>
-                Distance parcourue: {training.distance.toFixed(2)} km
+                Distance parcourue: {training.distance ? training.distance.toFixed(2) + 'km' : null }
             </ThemedText>
             <ThemedText>
                 Votre ressenti:
