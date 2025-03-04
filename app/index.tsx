@@ -9,7 +9,7 @@ export default function intro() {
         <ThemedView style={styles.mainContainer}>
             <Image
                 style={styles.logo}
-                source={{uri: "https://lh6.googleusercontent.com/proxy/vU5w1R8N9COetJHBUkqlPSdAAfvG_8S8YPdPQN7pKW3a7rHHuCvjikuMyxQuCSMMVxDMdaH_33GAsmcI2vi9yFmhk6k_VeOZjgfSB5Z_IzIHgpSfSoblffxL0xsa7TPeNqf13Bgr"}}
+                source={{uri: "https://static.wikia.nocookie.net/the-doom-in-our-blood-comes-back/images/6/6f/House_Targaryen_Emblem.png/revision/latest?cb=20231201125707"}}
             />
             <View style={styles.but}>
                 <Link style={styles.button} href="/login">Connexion</Link>
