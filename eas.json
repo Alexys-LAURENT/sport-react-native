@@ -1,6 +1,10 @@
 {
   "cli": {
+<<<<<<< Updated upstream
     "version": ">= 15.0.13",
+=======
+    "version": ">= 15.0.4",
+>>>>>>> Stashed changes
     "appVersionSource": "remote"
   },
   "build": {
