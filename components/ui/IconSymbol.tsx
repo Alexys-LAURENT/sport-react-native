@@ -12,6 +12,7 @@ import {
 import {
   BeakerIcon,
   ChartBarIcon,
+  ClockIcon,
   QueueListIcon,
   UserCircleIcon
 } from 'react-native-heroicons/outline';
@@ -27,6 +28,7 @@ const MAPPING = {
   'chart.bar': ChartBarIcon,
   'person.crop.circle': UserCircleIcon,
   'testtube.2': BeakerIcon,
+  'clock': ClockIcon,
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

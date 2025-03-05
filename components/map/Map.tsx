@@ -1,11 +1,12 @@
 import { ThemedText } from '@/components/ThemedText';
 import Constants from 'expo-constants';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import MapView, { MapStyleElement, Marker, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 
 const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 const darkMapStyle: MapStyleElement[] = [
     {
@@ -89,15 +90,57 @@ const darkMapStyle: MapStyleElement[] = [
     }
 ];
 
-export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: boolean; waypoints: { latitude: number; longitude: number }[], showTotalDistance?: boolean }) {
+
+
+export function Map({ isRealTime, waypoints, showTotalDistance, trainingId }: { isRealTime: boolean; waypoints: { latitude: number; longitude: number }[], showTotalDistance?: boolean; trainingId: string }) {
     const [totalDistance, setTotalDistance] = useState(0);
+    const [mapWaypoints, setMapWaypoints] = useState<{ latitude: number; longitude: number }[]>(waypoints);
+    const [userMovedMap, setUserMovedMap] = useState(false);
     const mapRef = useRef<MapView>(null);
     const distancesRef = useRef<{ [key: number]: number }>({});
+    const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // if isRealTime is true, update the waypoints every second and go to the last waypoint
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);
+                const data = await response.json();
+                setMapWaypoints(data.waypoints);
+
+                // Go to the last waypoint if user hasn't moved the map
+                if (data.waypoints.length > 0 && mapRef.current && !userMovedMap) {
+                    const lastWaypoint = data.waypoints[data.waypoints.length - 1];
+                    mapRef.current.animateToRegion({
+                        latitude: lastWaypoint.latitude,
+                        longitude: lastWaypoint.longitude,
+                        latitudeDelta: 0.002, // Zoom more
+                        longitudeDelta: 0.002, // Zoom more
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error fetching training:', error);
+            }
+        };
+
+        if (isRealTime) {
+            const interval = setInterval(fetchData, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [isRealTime, trainingId, userMovedMap]);
+
+    const handleUserMoveMap = () => {
+        setUserMovedMap(true);
+        if (moveTimeoutRef.current) {
+            clearTimeout(moveTimeoutRef.current);
+        }
+        moveTimeoutRef.current = setTimeout(() => setUserMovedMap(false), 5000);
+    };
 
     // Calcul des limites de la carte et de la région optimale
     const mapSettings = useMemo(() => {
         // Si waypoints est vide, retournez une valeur par défaut
-        if (!waypoints || waypoints.length === 0) {
+        if (!mapWaypoints || mapWaypoints.length === 0) {
             return {
                 optimalRegion: {
                     latitude: 48.8566, // Coordonnées par défaut (Paris)
@@ -111,8 +154,8 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
             };
         }
 
-        const latitudes = waypoints.map(wp => wp.latitude);
-        const longitudes = waypoints.map(wp => wp.longitude);
+        const latitudes = mapWaypoints.map(wp => wp.latitude);
+        const longitudes = mapWaypoints.map(wp => wp.longitude);
 
         const minLat = Math.min(...latitudes);
         const maxLat = Math.max(...latitudes);
@@ -144,7 +187,7 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
             center: { latitude: centerLat, longitude: centerLng },
             distanceThreshold: Math.max(maxLat - minLat, maxLng - minLng) * 1.5, // 150% de la taille du trajet
         };
-    }, [waypoints]);
+    }, [mapWaypoints]);
 
     const handleRegionChange = (region: Region) => {
         const { optimalRegion, center, maxAllowedDelta, distanceThreshold } = mapSettings;
@@ -167,8 +210,8 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
         setTotalDistance(total);
     };
 
-    // Vérifiez que waypoints a des données
-    if (!waypoints || waypoints.length < 1) {
+    // Vérifiez que mapWaypoints a des données
+    if (!mapWaypoints || mapWaypoints.length < 1) {
         return (
             <View style={[styles.container, styles.loadingContainer]}>
                 <ThemedText style={styles.loadingText}>Pas de données de parcours disponibles</ThemedText>
@@ -190,24 +233,25 @@ export function Map({ isRealTime, waypoints, showTotalDistance }: { isRealTime: 
                 showsCompass={true}
                 showsScale={true}
                 rotateEnabled={false}
+                onTouchMove={handleUserMoveMap}
             >
                 <Marker
-                    coordinate={waypoints[0]}
+                    coordinate={mapWaypoints[0]}
                     title="Départ"
                     image={require('@/assets/images/markerStart.png')}
                 />
 
-                <Marker
-                    coordinate={waypoints[waypoints.length - 1]}
+                {!isRealTime && <Marker
+                    coordinate={mapWaypoints[mapWaypoints.length - 1]}
                     title="Arrivée"
                     image={require('@/assets/images/markerEnd.png')}
-                />
+                />}
 
-                {waypoints.slice(0, -1).map((waypoint, index) => (
+                {mapWaypoints.slice(0, -1).map((waypoint, index) => (
                     <MapViewDirections
                         key={index}
                         origin={waypoint}
-                        destination={waypoints[index + 1]}
+                        destination={mapWaypoints[index + 1]}
                         apikey={GOOGLE_MAPS_API_KEY}
                         strokeWidth={3}
                         strokeColor="#c6ff00"

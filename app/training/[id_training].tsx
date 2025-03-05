@@ -1,8 +1,10 @@
 import { Map } from '@/components/map/Map';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { TrainingContext } from '@/context/TrainingContext';
 import Constants from 'expo-constants';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 interface Training {
@@ -27,12 +29,16 @@ export default function TrainingScreen() {
     const [training, setTraining] = useState<Training | null>(null);
     const [waypoints, setWaypoints] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isRealTime, setIsRealTime] = useState(false);
+    const { text, startTraining, stopTraining } = useContext(TrainingContext);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);
                 const data = await response.json();
                 setTraining(data.trainingInfo);
+                setIsRealTime(data.trainingInfo.endedDate === "");
                 setWaypoints(data.waypoints);
             } catch (error) {
                 console.error('Error fetching training:', error);
@@ -42,21 +48,17 @@ export default function TrainingScreen() {
         };
 
         fetchData();
-    }
-        , [id_training]);
+    }, [id_training]);
 
     return loading ? (
         <View style={{ flex: 1, paddingTop: 50, alignItems: 'center' }}>
             <ActivityIndicator size="large" color="#4CAF50" />
         </View>
     ) :
-        training && waypoints && (
+        training && waypoints && training.endedDate ? (
             <ScrollView contentContainerStyle={styles.container}>
-                <Map isRealTime={false} waypoints={waypoints} />
+                <Map trainingId={id_training} isRealTime={isRealTime} waypoints={waypoints} />
                 <View style={styles.infosContainer}>
-                    <Text style={styles.title}>
-                        Entrainement du {new Date(training.startedDate).toLocaleDateString()}
-                    </Text>
                     <Text style={{ color: 'white', fontSize: 16 }}>
                         {training.icon} <Text style={{ fontWeight: '700' }}>Type d'entrainement:</Text> {training.label.slice(0, 1).toUpperCase() + training.label.slice(1).toLowerCase()}
                     </Text>
@@ -89,6 +91,40 @@ export default function TrainingScreen() {
                     </View>
                 </View>
             </ScrollView>
+        ) : training && waypoints && (
+            <ScrollView contentContainerStyle={styles.container}>
+                <Map trainingId={id_training} isRealTime={isRealTime} waypoints={waypoints} />
+                <View style={styles.infosContainer}>
+                    <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ width: "100%", display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: '#343637', padding: 10, borderRadius: 8 }}>
+                            {/* Timer between startedDate and now */}
+                            <IconSymbol size={28} name="clock" color={'#FFFFFF'} />
+                            <Text style={{ color: 'white', fontSize: 16 }}>
+                                {(() => {
+                                    const start = new Date(training.startedDate);
+                                    const end = new Date();
+                                    const diffMs = end.getTime() - start.getTime();
+                                    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                                    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                                    return `${hours.toString().padStart(2, '0')} h ${minutes.toString().padStart(2, '0')} min`;
+                                })()}
+                            </Text>
+                        </View>
+                    </View>
+                    <View>
+                        <TouchableOpacity style={styles.button} onPress={() => startTraining()}>
+                            <Text>
+                                {text}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={() => stopTraining()}>
+                            <Text>
+                                Terminer l'entrainement
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView >
         );
 }
 
@@ -102,12 +138,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 20,
     },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        paddingBottom: 25,
-        color: 'white'
-    },
     feelingContainer: {
         padding: 10,
         backgroundColor: '#1e2021',
@@ -118,5 +148,14 @@ const styles = StyleSheet.create({
     feelingText: {
         fontSize: 14,
         color: 'white'
+    },
+    button: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        color: "black",
+        borderRadius: 10,
+        backgroundColor: "#C6FF00",
     },
 });

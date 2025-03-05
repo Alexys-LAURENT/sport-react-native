@@ -2,8 +2,10 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "sport",
-    slug: "sport",
+    owner: "weexo",
+    name: "FitTrack",
+    slug: "fittrack",
+    description: "Application de suivi de sport",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -17,7 +19,14 @@ export default {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
-      }
+      },
+      permissions: [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE"
+      ],
+      package: "com.anonymous.FitTrack"
     },
     web: {
       bundler: "metro",
@@ -34,6 +43,16 @@ export default {
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Autoriser $(PRODUCT_NAME) à accéder à votre position",
+          "locationAlwaysPermission": "Autoriser $(PRODUCT_NAME) à accéder à votre position",
+          "locationWhenInUsePermission": "Autoriser $(PRODUCT_NAME) à accéder à votre position",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
       ]
     ],
     experiments: {
@@ -42,7 +61,10 @@ export default {
     // Ajout de la section extra pour les variables d'environnement
     extra: {
       GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
-      API_URL: process.env.API_URL
+      API_URL: process.env.API_URL,
+      eas: {
+        "projectId": "50cdd12c-75bf-40a3-a4dd-a657a341e72a"
+      }
     }
   }
 }

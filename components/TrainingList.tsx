@@ -15,9 +15,8 @@ const TrainingList = () => {
     useEffect(() => {
         const fetchTrainings = async () => {
             try {
-                const response = await fetch(API_URL+`api/trainings/${ID_USER}`);
+                const response = await fetch(API_URL + `api/trainings/${ID_USER}`);
                 const data = await response.json();
-                console.log(data);
                 setTrainings(data.trainings);
             } catch (error) {
                 console.error('Erreur lors de la récupération des entraînements:', error);
@@ -34,7 +33,7 @@ const TrainingList = () => {
     }
 
     return (
-        <ScrollView style={{width:'100%'}} contentContainerStyle={{width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <ScrollView style={{ width: '100%' }} contentContainerStyle={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {
                 trainings.length > 0 ? (
                     trainings.map((training) => (

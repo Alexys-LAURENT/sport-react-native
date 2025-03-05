@@ -6,7 +6,6 @@ import { StyleSheet, Text, View } from 'react-native';
 
 
 const TrainingItem = ({ training }: { training: Training }) => {
-    console.log(training);
 
     const getDuration = (startedDate: string, endedDate: string) => {
         const started = dayjs(startedDate);
@@ -18,7 +17,15 @@ const TrainingItem = ({ training }: { training: Training }) => {
     }
 
     return (
-        <Link href={`/training/${training.idTraining}`}>
+        <Link
+            href={{
+                pathname: "/training/[id_training]",
+                params: {
+                    id_training: training.idTraining,
+                    date: training.startedDate
+                }
+            }}
+        >
             <View style={[styles.container, {
                 borderColor: training.endedDate ? 'rgba(255, 255, 255, 0.1)' : '#C6FF00'
             }]}>
