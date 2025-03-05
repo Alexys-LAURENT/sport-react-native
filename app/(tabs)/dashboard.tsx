@@ -1,9 +1,10 @@
 import { ThemedView } from "@/components/ThemedView";
 import dayjs, { Dayjs } from "dayjs";
+import 'dayjs/locale/fr';
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { LineChart, PieChart } from "react-native-gifted-charts";
+import { CurveType, LineChart, PieChart } from "react-native-gifted-charts";
 
 // TODO : change this to the current user id
 const ID_USER = 1
@@ -97,52 +98,49 @@ export default function DashboardScreen() {
         {months.map((month, index) => (
           <View
           onTouchEnd={() => setSelectedMonth(month)}
-          key={index} style={[selectedMonth === month ? styles.activeMonthContainer : styles.monthContainer]}>
-            <Text>{
-              month.format('MMMM YYYY')
-          }</Text>
+          key={index} 
+          style={[selectedMonth === month ? styles.activeMonthContainer : styles.monthContainer]}>
+            <Text style={{alignSelf: 'center', color : selectedMonth === month ? '' : '#D9D9D9' }} >{month.locale('fr').format('MMMM').slice(0, 4)}</Text>
+            <Text style={{alignSelf: 'center', color : selectedMonth === month ? '' : '#D9D9D9' }} >{month.locale('fr').format('YYYY')}</Text>
           </View>
         ))}
       </ScrollView>
         {
           isLoading ? (
-            <Text style={{color:'white'}}>Loading...</Text>
+            <Text style={{color:'#D9D9D9'}}>Loading...</Text>
           ) : (
-            <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', width: '100%', paddingBottom: 50}}>
-              <Text style={{color: 'white', fontSize: 20, marginTop: 10}}>Heures d'entrainement</Text>
+            <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', width: '100%', paddingBottom: 50, paddingLeft: 22, paddingRight: 22}}>
+              <Text style={{color: '#D9D9D9', fontSize: 20, marginTop: 15}}>Heures d'entrainement</Text>
               <Text style={{color: '#C6FF00', fontSize: 40,marginBottom: 20, fontWeight: 'bold', }}>{totalHours} h</Text>
-              <Text style={{color: 'white', fontSize: 20, marginTop: 10, marginBottom: 10}}>Statistiques</Text>
+              <Text style={{color: '#D9D9D9', fontSize: 20, marginTop: 10, marginBottom: 10}}>Statistiques</Text>
               <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap : 14, width: '100%', justifyContent: 'space-between'}}>
 
                 {/* Calories donut */}
                 
-                <View style={{ display :'flex', flexDirection : 'column', padding : 12, gap : 8 , minWidth: '100%', height: 150, backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)'}}>
-                <Text style={{color: 'white', fontSize : 14, textDecorationLine : 'underline', }}>Total des calories du mois</Text>
-                  <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                <Text style={{color: '#D9D9D9', fontSize : 14, textDecorationLine : 'underline', alignSelf : 'flex-start'}}>Total des calories du mois</Text>
+                <View style={{ display :'flex', flexDirection : 'row', alignItems: 'center', padding : 12, gap : 8 , minWidth: '100%', height: 150, backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)'}}>
                     <PieChart 
                     innerCircleColor={'#1E2021'}
                     innerRadius={30}
                     centerLabelComponent={()=> {
                       return (
-                        <Text style={{color: 'white', fontSize: 20}}>{totalCalories}</Text>
+                        <Text style={{color: '#D9D9D9', fontSize: 20}}>{totalCalories}</Text>
                       )
                     }}
                     radius={50}
                     textSize={20}
                     data={totalCalories > 0 ? [{value: totalCalories }] : [{ value : 1}]} />
-                    <Text style={{color: 'white', fontSize: 14, marginLeft : 10}}>{totalCalories > 0 ? 'Calories' : 'Aucune calorie ce mois ci'}</Text>
-                  </View>
+                    <Text style={{color: '#D9D9D9', fontSize: 14, marginLeft : 10}}>{totalCalories > 0 ? 'Calories' : 'Aucune calorie ce mois ci'}</Text>
                 </View>             
                 {/* Trainings types donut */}
-                <View style={{ display :'flex', flexDirection : 'column', padding : 12 , gap : 8 , minWidth: '100%', height: 150, backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)'}}>
-                <Text style={{color: 'white', fontSize : 14, textDecorationLine : 'underline', }}>Total types des séances du mois</Text>
-                  <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                <Text style={{color: '#D9D9D9', fontSize : 14, textDecorationLine : 'underline',alignSelf : 'flex-start' }}>Total types des séances du mois</Text>
+                <View style={{ display :'flex', flexDirection : 'row', alignItems: 'center', padding : 12 , gap : 8 , minWidth: '100%', height: 150, backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)'}}>
                     <PieChart 
                     innerCircleColor={'#1E2021'}
                     innerRadius={30}
                     centerLabelComponent={()=> {
                       return (
-                        <Text style={{color: 'white', fontSize: 20}}>{
+                        <Text style={{color: '#D9D9D9', fontSize: 20}}>{
                           countTrainningsTypes.length > 0 ? countTrainningsTypes.reduce((acc, curr) => acc + curr.count, 0) : 0
                         }</Text>
                       )
@@ -153,33 +151,34 @@ export default function DashboardScreen() {
                       {countTrainningsTypes.length > 0 ? countTrainningsTypes.map((training, index) => (
                         <View key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>
                           <View style={{width: 10, height: 10, backgroundColor: training.color, borderRadius: 5}}></View>
-                          <Text style={{color: 'white', fontSize: 16}}>{training.type.charAt(0).toUpperCase() + training.type.slice(1)} : {training.count}</Text>
+                          <Text style={{color: '#D9D9D9', fontSize: 16}}>{training.type.charAt(0).toUpperCase() + training.type.slice(1)} : {training.count}</Text>
                         </View>
-                      )) : <Text style={{color: 'white', fontSize: 16}}>Aucune séance ce mois ci</Text>}
+                      )) : <Text style={{color: '#D9D9D9', fontSize: 16}}>Aucune séance ce mois ci</Text>}
                     </View>
-                  </View>
                 </View>
                 {/* Line Chart */}
-                <View style={{ display :'flex', flexDirection : 'column', padding : 12 , gap: 8, minWidth: '100%', height: 'auto', backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)'}}>
-                <Text style={{color: 'white', fontSize : 14, textDecorationLine : 'underline', }}>Suivis des calories</Text>
-                  <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                <Text style={{color: '#D9D9D9', fontSize : 14, textDecorationLine : 'underline', alignSelf : 'flex-start' }}>Suivis des calories</Text>
+                <View style={{ display :'flex', flexDirection : 'row', alignItems: 'center', padding : 12 , gap: 8, minWidth: '100%', height: 'auto', backgroundColor: '#1E2021', borderRadius : 12 , borderWidth: 1 , borderColor: 'rgba(255, 255, 255, 0.1)', overflow: 'hidden'}}>
                     <LineChart
-                      initialSpacing={0}
+                      initialSpacing={1}
                       data={
                         trainingOverDays
                       }
                       hideRules
-                      yAxisColor="#C6FF00"
-                      xAxisColor="#C6FF00"
+                      curved 
+                      yAxisColor="#405203"
+                      xAxisColor="#405203"
                       showVerticalLines
-                      verticalLinesColor="#C6FF00"
-                      xAxisLabelTextStyle={{color: '#ffffff', transform: [{translateX: 7}]}}
+                      verticalLinesColor="#405203"
+                      xAxisLabelTextStyle={{color: '#ffffff'}}
+                      curveType={CurveType.QUADRATIC}
                       yAxisTextStyle={{color: '#ffffff'}}
+                      isAnimated 
+                      hideDataPoints
                       // lineColor
                       color="#C6FF00"
                       thickness={5}
                     />
-                  </View>
                 </View>
 
             </View>
@@ -194,26 +193,41 @@ const styles = StyleSheet.create({
   mainContainer: {
     display: 'flex',
     alignItems: 'center',
-    padding: 32,
+    // padding: 32,
+    paddingTop: 32,
+    paddingBottom: 32,
     minHeight: '100%',
   },
   scrollContainer: {
     marginTop: 20,
-    height: 40,
-    maxHeight: 40,
-  },
+    minHeight: 50,
+    },
   monthContainer: {
     padding: 10,
     marginHorizontal: 5,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#212121',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    minHeight: 50,
+    maxHeight: 50,
+    display: 'flex',
+    flexDirection: 'column',
     borderRadius: 5,
-    height: 35,
+    justifyContent: 'center',
+    alignContent: 'center',
+    gap: 5,
   },
   activeMonthContainer: {
     padding: 10,
     marginHorizontal: 5,
     backgroundColor: '#C6FF00',
     borderRadius: 5,
-    height: 35,
+    minHeight: 50,
+    maxHeight: 50,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignContent: 'center',
+    gap: 5,
   },
 });
