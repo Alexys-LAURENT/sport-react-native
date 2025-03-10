@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { View, Text, Alert, TextInput, Image, Button } from "react-native";
 
 export default function ProfileScreen() {
@@ -21,8 +21,24 @@ export default function ProfileScreen() {
             ]
         );
     };
+
+    const handleUpdateAccount = () => {
+        Alert.alert(
+            "Mettre à jour",
+            "Êtes-vous sûr de vouloir mettre à jour votre compte ?",
+            [
+                { text: "Annuler", style: "cancel" },
+                { text: "Mettre à jour", style: "default", onPress: () => updateUser() },
+            ]
+        );
+    };
+
     const deleteUser = () => {
         console.log("Compte supprimé");
+    };
+
+    const updateUser = () => {
+        console.log("Compte mise à jour");
     };
     const [prenom, onChangePrenom] = React.useState('');
     const [nom, onChangeNom] = React.useState('');
@@ -34,10 +50,11 @@ export default function ProfileScreen() {
                 <View style={styles.introView}>
                     <Image
                         style={styles.image}
-                        source={{uri: user.photo}}
+                        source={{ uri: user.photo }}
                     />
                     <Text style={styles.nameStyle} className="text-lg">{user.firstName} {user.lastName}</Text>
                 </View>
+
                 <Text style={styles.textStyle} className="text-lg">Prénom</Text>
                 <TextInput
                     style={styles.input}
@@ -45,13 +62,16 @@ export default function ProfileScreen() {
                     value={prenom}
                     placeholder={user.firstName}
                 />
+
                 <Text style={styles.textStyle} className="text-lg">Nom</Text>
                 <TextInput
                     style={styles.input}
                     onChangeText={onChangeNom}
                     value={nom}
                     placeholder={user.lastName}
+
                 />
+
                 <Text style={styles.textStyle} className="text-lg">Adresse Email</Text>
                 <TextInput
                     style={styles.input}
@@ -59,6 +79,7 @@ export default function ProfileScreen() {
                     value={email}
                     placeholder={user.email}
                 />
+
                 <Text style={styles.textStyle} className="text-lg">Sexe</Text>
                 <TextInput
                     style={styles.input}
@@ -66,20 +87,36 @@ export default function ProfileScreen() {
                     value={sexe}
                     placeholder={user.gender}
                 />
+
+                 <View style={styles.updateView}>
+                    <TouchableOpacity
+                        style={styles.updateButton}
+                        onPress={handleUpdateAccount}
+                    >
+                        <Text style={styles.ButtonText}>Mettre à jour</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.separator} />
+
                 <View style={styles.endingView}>
                     <Text style={styles.textStyle} className="text-lg">Supprimer votre compte</Text>
-                    <Button
-                        title="Supprimer définitivement"
-                        color="red"
+                    <TouchableOpacity
+                        style={styles.deleteButton}
                         onPress={handleDeleteAccount}
-                    />
+                    >
+                        <Text style={styles.ButtonText}>Supprimer définitivement</Text>
+                    </TouchableOpacity>
                 </View>
+
+               
+
             </View>
         </ThemedView>
     );
 }
-    
-    
+
+
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
@@ -89,27 +126,70 @@ const styles = StyleSheet.create({
     },
     mainView: {
         width: '90%',
+
     },
+
+    inputContainer: {
+    },
+
     introView: {
         flexDirection: 'row',
-        flexWrap: 'wrap', 
+        flexWrap: 'wrap',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
+
     },
     endingView: {
         marginTop: 20,
     },
+
+    updateView: {
+    },
+
+    separator: {
+        height: 1,
+        backgroundColor: '#ccc',
+        marginVertical: 20,
+    },
+
+    deleteButton: {
+        backgroundColor: '#FA795D',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+
+    updateButton: {
+        color: 'white',
+        backgroundColor: '#43A047',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+
+    ButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
     input: {
-        height: 50,
+        height: 45,
         marginTop: 6,
-        marginBottom: 6,
+        marginBottom: 30,
         borderWidth: 1,
         padding: 10,
         borderRadius: 5,
-        borderColor:'grey',
+        borderColor: 'grey',
+
     },
     textStyle: {
         color: 'white',
+        marginBottom: 1,
+
     },
     image: {
         width: 100,
@@ -117,7 +197,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         alignSelf: 'flex-start',
     },
-    nameStyle : {
+    nameStyle: {
         color: 'white',
         fontSize: 28,
         marginLeft: 10,
