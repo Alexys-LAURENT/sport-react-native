@@ -20,14 +20,13 @@ interface Training {
 }
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-
 export default function TrainingScreen() {
     const { id_training } = useLocalSearchParams<{ id_training: string }>();
     const trainingId = id_training ? parseInt(id_training) : null;
     const [training, setTraining] = useState<Training | null>(null);
     const [waypoints, setWaypoints] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
+    useEffect(() => { 
         const fetchData = async () => {
             try {
                 const response = await fetch(`${API_URL}api/trainingPage/getTrainingInfoById/${trainingId}`);

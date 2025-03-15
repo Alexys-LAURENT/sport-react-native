@@ -11,6 +11,9 @@ export default function ProfileScreen() {
         gender: "Homme",
         photo: "https://static.wikia.nocookie.net/gameofthronesfanon/images/8/8d/Rhaegar_Targaryen_%28ASOIAF%29.png/revision/latest/thumbnail/width/360/height/360?cb=20190315025149",
     };
+    
+
+
     const handleDeleteAccount = () => {
         Alert.alert(
             "Supprimer le compte",
@@ -22,7 +25,9 @@ export default function ProfileScreen() {
         );
     };
 
-    const handleUpdateAccount = () => {
+    
+    
+    const handleUpdateAccount = () => { 
         Alert.alert(
             "Mettre à jour",
             "Êtes-vous sûr de vouloir mettre à jour votre compte ?",
