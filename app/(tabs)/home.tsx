@@ -24,12 +24,11 @@ export default function HomeScreen() {
 
         <ThemedText style={styles.titleContainer} type="title">Vos derniers entrainements 💪</ThemedText>
 
-          <TrainingList />
+        <TrainingList />
 
         <ThemedText style={styles.titleContainer} type="title">Ne lachez rien</ThemedText>
 
         <Link style={styles.button} href="/(tabs)/home">Se Connecter</Link>
-
 
       </ThemedView>
 
@@ -63,4 +62,18 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     fontSize: 20,
   },
+
+  button: {
+    textAlign: 'center',
+    marginTop: 20,
+    paddingLeft: 120,
+    paddingRight: 120,
+    paddingTop: 15,
+    paddingBottom: 15,
+    color: "black",
+    borderRadius: 10,
+    backgroundColor: "#C6FF00",
+    marginBottom: 15,
+  },
+
 });
