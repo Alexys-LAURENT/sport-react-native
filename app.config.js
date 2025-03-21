@@ -58,6 +58,18 @@ export default {
           "isAndroidBackgroundLocationEnabled": true,
           "isIosBackgroundLocationEnabled": true
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1e1f24",
+          "image": "./assets/images/splash-icon.png",
+          "dark": {
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#1e1f24"
+          },
+          "imageWidth": 200
+        }
       ]
     ],
     experiments: {
