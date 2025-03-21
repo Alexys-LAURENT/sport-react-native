@@ -3,6 +3,10 @@ import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet } from "react-native";
 import { Image, View, Button, Text, TextInput } from "react-native";
 import { Link } from 'expo-router';
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function signin() {
     const [prenom, onChangePrenom] = React.useState('');
@@ -10,6 +14,35 @@ export default function signin() {
     const [email, onChangeMail] = React.useState('');
     const [sexe, onChangeSexe] = React.useState('');
     const [password, onChangePassword] = React.useState('');
+    const router = useRouter();
+    const signIn = async () => {
+        try {
+            const response = await fetch(API_URL+"/inscription", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nom: nom,
+                    prenom: prenom,
+                    sexe: sexe,
+                    email: email,
+                    hashedPass: password,
+                }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Token JWT :", data.token);
+                router.push("/(tabs)/home");
+            } else {
+                const data = await response.json();
+                alert("Identifiants déjà utilisé");
+                console.log("Erreur", "Identifiants déjà utilisé");
+            }
+        } catch (error) {
+            console.error("Erreur d'inscription :", error);
+        }
+    };
     return (
         <ThemedView style={styles.mainContainer}>
             <Image
@@ -20,36 +53,36 @@ export default function signin() {
             <View style={styles.mainView}>
                 <Text style={styles.textStyle} className="text-lg">Prénom</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     onChangeText={onChangePrenom}
                     value={prenom}
                 />
                 <Text style={styles.textStyle} className="text-lg">Nom</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     onChangeText={onChangeNom}
                     value={nom}
                 />
                 <Text style={styles.textStyle} className="text-lg">Adresse Email</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     onChangeText={onChangeMail}
                     value={email}
                 />
                 <Text style={styles.textStyle} className="text-lg">Sexe</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     onChangeText={onChangeSexe}
                     value={sexe}
                 />
                 <Text style={styles.textStyle}>Mot de Passe</Text>
                 <TextInput 
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     secureTextEntry
                     onChangeText={onChangePassword}
                     value={password}
                 />
-                <Link style={styles.button} href="/(tabs)/home">S'inscrire</Link>
+                <Button title="S'inscrire" onPress={signIn}/>
             </View>
             <Link style={styles.button_tres} href="/login">Vous avez déjà un compte ? Cliquez ici</Link>
         </ThemedView>

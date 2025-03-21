@@ -2,11 +2,41 @@ import React from 'react';
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet } from "react-native";
 import { Image, View, Button, Text, TextInput } from "react-native";
+import Constants from 'expo-constants';
 import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function login() {
     const [email, onChangeMail] = React.useState('');
     const [password, onChangePassword] = React.useState('');
+    const router = useRouter();
+
+    const login = async () => {
+        try {
+            const response = await fetch(API_URL+"/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    hashedPass: password,
+                }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Token JWT :", data.token);
+                router.push("/(tabs)/home");
+            } else {
+                console.log("Erreur", "Identifiants invalides");
+            }
+        } catch (error) {
+            alert("Erreur de connexion :"+error);
+            console.error("Erreur de connexion :", error);
+        }
+    };
     return (
         <ThemedView style={styles.mainContainer}>
             <Image
@@ -17,18 +47,18 @@ export default function login() {
             <View style={styles.mainView}>
                 <Text style={styles.textStyle}>Email</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     onChangeText={onChangeMail}
                     value={email}
                 />
                 <Text style={styles.textStyle}>Mot de Passe</Text>
                 <TextInput 
-                    style={styles.input}
+                    style={[styles.input, { color: "white" }]}
                     secureTextEntry
                     onChangeText={onChangePassword}
                     value={password}
                 />
-                <Link style={styles.button} href="/(tabs)/home">Se Connecter</Link>
+                <Button title="Se Connecter" onPress={login}/>
                 <Link style={styles.button_bis} href="/signin">Pas encore de compte ? Cliquez ici</Link>
             </View>
             <Link style={styles.button_tres} href="/">Mot de passe oublié ? Cliquez ici</Link>
