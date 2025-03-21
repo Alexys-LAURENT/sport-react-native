@@ -3,44 +3,34 @@ import Constants from 'expo-constants';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
+import {router, useLocalSearchParams} from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function TrainingFeedbackScreen() {
-    const route = useRoute();
-    const navigation = useNavigation();
-    const { trainingId } = route.params || {};
-
-    const [difficulty, setDifficulty] = useState(3); // 1-5: very easy to very difficult
-    const [feedback, setFeedback] = useState('');
+    const { id_training } = useLocalSearchParams<{ id_training: string }>();
+    const [difficultyIndex, setDifficultyIndex] = useState(2);
+    const [feeling, setFeeling] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    // Labels for difficulty levels
-    const difficultyLabels = ['Très simple', 'Simple', 'Modéré', 'Difficile', 'Très difficile'];
-
-    const getDifficultyLabelPosition = () => {
-        return (difficulty - 1) / 4; // 0 to 1 position for the slider
-    };
-
+    const difficultyLabels = ['très facile', 'facile', 'modéré', 'difficile', 'très difficile'];
+    if(!id_training){
+        router.push('/(tabs)/home')
+    }
     const handleSubmit = async () => {
-        if (!trainingId) {
-            setError("ID d'entraînement manquant");
-            return;
-        }
-
         setLoading(true);
         setError(null);
 
+        const difficulty=difficultyLabels[difficultyIndex -1]||difficultyLabels[2]
         try {
-            const response = await fetch(`${API_URL}/trainings/${trainingId}`, {
-                method: 'PATCH',
+            const response = await fetch(`${API_URL}api/trainings/${id_training}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    difficulty,
-                    feedback,
+                    difficulty:difficulty,
+                    feeling:feeling||"",
                 }),
             });
 
@@ -49,14 +39,13 @@ export default function TrainingFeedbackScreen() {
             }
 
             // Navigation à la page d'accueil ou page de succès
-            navigation.navigate('Home');
-        } catch (err) {
+            router.push('/(tabs)/home')
+        } catch (err:any) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Comment était votre séance ?</Text>
@@ -69,8 +58,8 @@ export default function TrainingFeedbackScreen() {
                     minimumValue={1}
                     maximumValue={5}
                     step={1}
-                    value={difficulty}
-                    onValueChange={setDifficulty}
+                    value={difficultyIndex}
+                    onValueChange={setDifficultyIndex}
                     minimumTrackTintColor="#CCFF00"
                     maximumTrackTintColor="#333333"
                     thumbTintColor="#CCFF00"
@@ -82,7 +71,7 @@ export default function TrainingFeedbackScreen() {
                             key={index}
                             style={[
                                 styles.difficultyLabel,
-                                difficulty === index + 1 ? styles.activeDifficultyLabel : null
+                                difficultyIndex === index + 1 ? styles.activeDifficultyLabel : null
                             ]}
                         >
                             {label}
@@ -99,8 +88,8 @@ export default function TrainingFeedbackScreen() {
                     placeholderTextColor="#666"
                     multiline
                     numberOfLines={5}
-                    value={feedback}
-                    onChangeText={setFeedback}
+                    value={feeling}
+                    onChangeText={setFeeling}
                 />
             </View>
 
