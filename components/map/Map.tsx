@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import MapView, { MapStyleElement, Marker, Region } from 'react-native-maps';
+import MapView, { MapStyleElement, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 
 const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
@@ -234,6 +234,7 @@ export function Map({ isRealTime, waypoints, showTotalDistance, trainingId }: { 
                 showsScale={true}
                 rotateEnabled={false}
                 onTouchMove={handleUserMoveMap}
+                provider={PROVIDER_GOOGLE}
             >
                 <Marker
                     coordinate={mapWaypoints[0]}
