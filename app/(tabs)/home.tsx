@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
         <ThemedText style={styles.titleContainer} type="title">Vos derniers entrainements 💪</ThemedText>
 
-        <TrainingList />
+        <TrainingList limit={5} />
 
         <ThemedText style={styles.titleContainer} type="title">Ne lachez rien</ThemedText>
 
