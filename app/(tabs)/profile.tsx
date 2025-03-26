@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Alert, View, Text, TextInput, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
+import Constants from 'expo-constants';
+import React, { useEffect, useState } from "react";
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 // 🔹 Composant photo, nom
 const ProfileHeader = ({ photo, fullName }: { photo: string; fullName: string }) => (
@@ -27,7 +30,7 @@ export default function ProfileScreen() {
     const [user, setUser] = useState({ id: "", firstName: "", lastName: "", email: "", gender: "", photo: "" });
 
     useEffect(() => {
-        fetch(`http://localhost:8080/users/1`) // Remplace 1 par un ID valide
+        fetch(`${API_URL}users/1`) // Remplace 1 par un ID valide
             .then((response) => response.json())
             .then((data) => setUser(data))
             .catch((error) => console.error("Erreur API :", error));
@@ -41,7 +44,7 @@ export default function ProfileScreen() {
     };
 
     const updateUser = () => {
-        fetch(`https://localhost:8080/update/${user.id}`, {
+        fetch(`${API_URL}update/${user.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user),
@@ -59,7 +62,7 @@ export default function ProfileScreen() {
     };
 
     const deleteUser = () => {
-        fetch(`https://localhost:8080/delete/${user.id}`, {
+        fetch(`${API_URL}delete/${user.id}`, {
             method: "DELETE",
         })
             .then((response) => response.json())
@@ -68,6 +71,7 @@ export default function ProfileScreen() {
     };
 
     return (
+        console.log(user),
         <ThemedView style={styles.mainContainer}>
             <View style={styles.mainView}>
                 <ProfileHeader photo={user.photo} fullName={`${user.firstName} ${user.lastName}`} />

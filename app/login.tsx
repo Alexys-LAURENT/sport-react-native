@@ -1,10 +1,8 @@
-import React from 'react';
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet } from "react-native";
-import { Image, View, Button, Text, TextInput } from "react-native";
 import Constants from 'expo-constants';
-import { Link } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import React from 'react';
+import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -15,7 +13,8 @@ export default function login() {
 
     const login = async () => {
         try {
-            const response = await fetch(API_URL+"/login", {
+            console.log(API_URL);
+            const response = await fetch(API_URL+"login", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,6 +24,9 @@ export default function login() {
                     hashedPass: password,
                 }),
             });
+
+            console.log("response", response);
+
             if (response.ok) {
                 const data = await response.json();
                 console.log("Token JWT :", data.token);

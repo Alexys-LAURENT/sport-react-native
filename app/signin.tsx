@@ -1,10 +1,8 @@
-import React from 'react';
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet } from "react-native";
-import { Image, View, Button, Text, TextInput } from "react-native";
-import { Link } from 'expo-router';
 import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import React from 'react';
+import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -17,7 +15,7 @@ export default function signin() {
     const router = useRouter();
     const signIn = async () => {
         try {
-            const response = await fetch(API_URL+"/inscription", {
+            const response = await fetch(API_URL+"inscription", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
