@@ -5,9 +5,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 
-const TrainingItem = ({ training }:{training:Training}) => {
-    console.log(training);
-    
+const TrainingItem = ({ training }: { training: Training }) => {
+
     const getDuration = (startedDate: string, endedDate: string) => {
         const started = dayjs(startedDate);
         const ended = dayjs(endedDate);
@@ -18,37 +17,45 @@ const TrainingItem = ({ training }:{training:Training}) => {
     }
 
     return (
-        <Link href={`/training/${training.idTraining}`}>
-        <View style={[styles.container, {
-            borderColor: training.endedDate ? 'rgba(255, 255, 255, 0.1)' : '#C6FF00'
-        }]}>
-            <View style={{display: 'flex', flexDirection: 'column', gap: 8}}>
-                <View>
-                    <Text style={{color:'#D9D9D9', fontSize : 20}}>{training.icon} {training.label}</Text>
-                </View>
-                <View style={{display: 'flex', flexDirection: 'row', gap: 8}}>
-                    <Text style={{color:'#D9D9D9', fontSize : 13}}>{dayjs(training.startedDate).format('DD/MM/YYYY')}</Text>
-                   {
-                    training.endedDate && <Text style={{color:'#D9D9D9', fontSize : 13}}>{getDuration(training.startedDate, training.endedDate)}</Text>
-                   }
-                </View>
-            </View>
-            <View>
-                {
-                    training.endedDate ? (
-                        <Text style={{color:'#D9D9D9'}}>{training.calories} Kcal</Text>
-                    ) : (
-                        <Text style={{color:'#C6FF00'}}>En cours</Text>
-                    )
+        <Link
+            href={{
+                pathname: "/training/[id_training]",
+                params: {
+                    id_training: training.idTraining,
+                    date: training.startedDate
                 }
+            }}
+        >
+            <View style={[styles.container, {
+                borderColor: training.endedDate ? 'rgba(255, 255, 255, 0.1)' : '#C6FF00'
+            }]}>
+                <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <View>
+                        <Text style={{ color: '#D9D9D9', fontSize: 20 }}>{training.icon} {training.label}</Text>
+                    </View>
+                    <View style={{ display: 'flex', flexDirection: 'row', gap: 8 }}>
+                        <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{dayjs(training.startedDate).format('DD/MM/YYYY')}</Text>
+                        {
+                            training.endedDate && <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{getDuration(training.startedDate, training.endedDate)}</Text>
+                        }
+                    </View>
+                </View>
+                <View>
+                    {
+                        training.endedDate ? (
+                            <Text style={{ color: '#D9D9D9' }}>{training.calories} Kcal</Text>
+                        ) : (
+                            <Text style={{ color: '#C6FF00' }}>En cours</Text>
+                        )
+                    }
+                </View>
             </View>
-        </View>
         </Link>
     );
 };
 
 const styles = StyleSheet.create({
-    container : {
+    container: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',

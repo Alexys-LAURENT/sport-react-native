@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Docker sport",
+            "database": "fitness_db",
+            "username": "fitness_user",
+            "password": "fitness_password"
+        }
+    ]
+}

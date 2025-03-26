@@ -16,7 +16,6 @@ const TrainingList = ({ limit = 5 }: { limit?: number }) => {
             try {
                 const response = await fetch(`${API_URL}api/trainings/${ID_USER}?limit=${limit}`);
                 const data = await response.json();
-                console.log("Données récupérées :", data);
                 setTrainings(data.trainings);
             } catch (error) {
                 console.error("Erreur lors de la récupération des entraînements:", error);
