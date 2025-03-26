@@ -73,10 +73,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         color: 'white',
     },
+
     mainView: {
         top: 50,
         width: '90%',
     },
+    
     logo: {
         position: 'absolute',
         width: 100,
