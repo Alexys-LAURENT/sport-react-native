@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { AuthProvider } from '../context/AuthContext';
 
 import { TrainingProvider } from '@/context/TrainingContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -31,26 +32,28 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <TrainingProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="signin" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="training/[id_training]"
-            options={({ route }: { route: any }) => ({
-              headerTitle: route.params?.date ?
-                `Entrainement du ${new Date(route.params.date).toLocaleDateString()}` :
-                'Entrainement',
-              headerTitleStyle: {
-                fontSize: 16,
-              }
-            })}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </TrainingProvider>
-      <StatusBar style="auto" />
+      <AuthProvider>
+        <TrainingProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="signin" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="training/[id_training]"
+              options={({ route }: { route: any }) => ({
+                headerTitle: route.params?.date ?
+                  `Entrainement du ${new Date(route.params.date).toLocaleDateString()}` :
+                  'Entrainement',
+                headerTitleStyle: {
+                  fontSize: 16,
+                }
+              })}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </TrainingProvider>
+        <StatusBar style="auto" />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

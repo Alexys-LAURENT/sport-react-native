@@ -100,7 +100,7 @@ export default function DashboardScreen() {
           onTouchEnd={() => setSelectedMonth(month)}
           key={index} 
           style={[selectedMonth === month ? styles.activeMonthContainer : styles.monthContainer]}>
-            <Text style={{alignSelf: 'center', color : selectedMonth === month ? '' : '#D9D9D9' }} >{month.locale('fr').format('MMMM').slice(0, 4)}</Text>
+            <Text style={{alignSelf: 'center', color : selectedMonth === month ? '' : '#D9D9D9' }} >{month.locale('fr').format('MMMM').length > 4 ? month.locale('fr').format('MMMM').slice(0, 3) : month.locale('fr').format('MMMM').slice(0, 4)}</Text>
             <Text style={{alignSelf: 'center', color : selectedMonth === month ? '' : '#D9D9D9' }} >{month.locale('fr').format('YYYY')}</Text>
           </View>
         ))}

@@ -1,44 +1,62 @@
 import { ThemedView } from "@/components/ThemedView";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Link, useRouter } from 'expo-router';
-import React from 'react';
-import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useState } from 'react';
+import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-export default function login() {
-    const [email, onChangeMail] = React.useState('');
-    const [password, onChangePassword] = React.useState('');
+export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const router = useRouter();
 
-    const login = async () => {
+    const handleLogin = async () => {
+        // Basic input validation
+        if (!email || !password) {
+            Alert.alert('Erreur', 'Veuillez saisir votre email et mot de passe');
+            return;
+        }
+
         try {
-            console.log(API_URL);
-            const response = await fetch(API_URL+"login", {
+            const response = await fetch(`${API_URL}login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: email,
+                    email,
                     hashedPass: password,
                 }),
             });
 
-            console.log("response", response);
+            const data = await response.json();
 
             if (response.ok) {
-                const data = await response.json();
-                console.log("Token JWT :", data.token);
+                console.log('Login successful:', data);
+                // Store the JWT token securely
+                await AsyncStorage.setItem('userToken', data.token);
+            
+                // Store user info in AsyncStorage
+                await AsyncStorage.setItem('userId', data.idUser.toString());
+                await AsyncStorage.setItem('userEmail', data.email);
+                await AsyncStorage.setItem('userFirstName', data.firstName);
+                await AsyncStorage.setItem('userLastName', data.lastName);
+                await AsyncStorage.setItem('userGender', data.gender);
+            
+                // Navigate to home screen
                 router.push("/(tabs)/home");
             } else {
-                console.log("Erreur", "Identifiants invalides");
+                // Handle login failure
+                Alert.alert('Erreur', data.error || 'Identifiants invalides');
             }
         } catch (error) {
-            alert("Erreur de connexion :"+error);
-            console.error("Erreur de connexion :", error);
+            console.error('Login error:', error);
+            Alert.alert('Erreur de connexion', 'Impossible de se connecter. Vérifiez votre connexion.');
         }
     };
+
     return (
         <ThemedView style={styles.mainContainer}>
             <Image
@@ -50,17 +68,19 @@ export default function login() {
                 <Text style={styles.textStyle}>Email</Text>
                 <TextInput
                     style={[styles.input, { color: "white" }]}
-                    onChangeText={onChangeMail}
+                    onChangeText={setEmail}
                     value={email}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
                 />
                 <Text style={styles.textStyle}>Mot de Passe</Text>
                 <TextInput 
                     style={[styles.input, { color: "white" }]}
                     secureTextEntry
-                    onChangeText={onChangePassword}
+                    onChangeText={setPassword}
                     value={password}
                 />
-                <Button title="Se Connecter" onPress={login}/>
+                <Button title="Se Connecter" onPress={handleLogin}/>
                 <Link style={styles.button_bis} href="/signin">Pas encore de compte ? Cliquez ici</Link>
             </View>
             <Link style={styles.button_tres} href="/">Mot de passe oublié ? Cliquez ici</Link>
@@ -75,12 +95,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         color: 'white',
     },
-
     mainView: {
         top: 50,
         width: '90%',
     },
-    
     logo: {
         position: 'absolute',
         width: 100,

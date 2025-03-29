@@ -1,4 +1,5 @@
 import { ThemedView } from "@/components/ThemedView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -6,12 +7,19 @@ import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } fro
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 // 🔹 Composant photo, nom
-const ProfileHeader = ({ photo, fullName }: { photo: string; fullName: string }) => (
-    <View style={styles.introView}>
-        <Image style={styles.image} source={{ uri: photo }} />
-        <Text style={styles.nameStyle}>{fullName}</Text>
-    </View>
-);
+const ProfileHeader = ({ photo, fullName }: { photo: string; fullName: string }) => {
+    return (
+        <View style={styles.introView}>
+            <View style={{ width: 100, height: 100, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <Image 
+                    style={styles.image} 
+                    source={require('@/assets/images/defaultUserIcon.png')}
+                />
+            </View>
+            <Text style={styles.nameStyle}>{fullName}</Text>
+        </View>
+    );
+};
 
 const ProfileField = ({ label, value, onChangeText }: { label: string; value: string; onChangeText: (text: string) => void }) => (
     <View>
@@ -27,13 +35,42 @@ const ActionButton = ({ title, onPress, color }: { title: string; onPress: () =>
 );
 
 export default function ProfileScreen() {
-    const [user, setUser] = useState({ id: "", firstName: "", lastName: "", email: "", gender: "", photo: "" });
+    const [user, setUser] = useState({ 
+        idUser: "", 
+        prenom: "", 
+        nom: "", 
+        email: "", 
+        sexe: "", 
+        photo: "" 
+    });
 
     useEffect(() => {
-        fetch(`${API_URL}users/1`) // Remplace 1 par un ID valide
-            .then((response) => response.json())
-            .then((data) => setUser(data))
-            .catch((error) => console.error("Erreur API :", error));
+        const fetchUser = async () => {
+            try {
+                // Retrieve userId from AsyncStorage
+                const userId = await AsyncStorage.getItem('userId');
+                
+                if (!userId) {
+                    Alert.alert('Erreur', 'Impossible de récupérer l\'identifiant utilisateur');
+                    return;
+                }
+
+                // Fetch user details
+                const response = await fetch(`${API_URL}users/${userId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données utilisateur');
+                }
+
+                const data = await response.json();
+                setUser(data);
+            } catch (error) {
+                console.error("Erreur API :", error);
+                Alert.alert('Erreur', 'Impossible de charger les informations utilisateur');
+            }
+        };
+        
+        fetchUser();
     }, []);
 
     const handleUpdateAccount = () => {
@@ -44,7 +81,7 @@ export default function ProfileScreen() {
     };
 
     const updateUser = () => {
-        fetch(`${API_URL}update/${user.id}`, {
+        fetch(`${API_URL}update/${user.idUser}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user),
@@ -62,7 +99,7 @@ export default function ProfileScreen() {
     };
 
     const deleteUser = () => {
-        fetch(`${API_URL}delete/${user.id}`, {
+        fetch(`${API_URL}delete/${user.idUser}`, {
             method: "DELETE",
         })
             .then((response) => response.json())
@@ -71,14 +108,13 @@ export default function ProfileScreen() {
     };
 
     return (
-        console.log(user),
         <ThemedView style={styles.mainContainer}>
             <View style={styles.mainView}>
-                <ProfileHeader photo={user.photo} fullName={`${user.firstName} ${user.lastName}`} />
-                <ProfileField label="Prénom" value={user.firstName} onChangeText={(text) => setUser({ ...user, firstName: text })} />
-                <ProfileField label="Nom" value={user.lastName} onChangeText={(text) => setUser({ ...user, lastName: text })} />
+                <ProfileHeader photo={user.photo} fullName={`${user.prenom} ${user.nom}`} />
+                <ProfileField label="Prénom" value={user.prenom} onChangeText={(text) => setUser({ ...user, prenom: text })} />
+                <ProfileField label="Nom" value={user.nom} onChangeText={(text) => setUser({ ...user, nom: text })} />
                 <ProfileField label="Email" value={user.email} onChangeText={(text) => setUser({ ...user, email: text })} />
-                <ProfileField label="Sexe" value={user.gender} onChangeText={(text) => setUser({ ...user, gender: text })} />
+                <ProfileField label="Sexe" value={user.sexe} onChangeText={(text) => setUser({ ...user, sexe: text })} />
 
                 <View style={styles.buttonContainer}>
                     <ActionButton title="Mettre à jour" onPress={handleUpdateAccount} color="#43A047" />
@@ -108,25 +144,26 @@ const styles = StyleSheet.create({
     },
 
     image: {
-        width: 100,
-        height: 100,
-        borderRadius: 50
+        width: 75,
+        height: 75,
+        borderRadius: 100
     },
 
     nameStyle: {
         fontSize: 28,
-        marginLeft: 10
+        marginLeft: 10,
+        color: "white",
     },
     textStyle: {
         marginBottom: 5,
         color: "white",
-
     },
 
     input: {
         height: 45, borderWidth: 1,
         borderColor: "grey", padding: 10,
-        borderRadius: 5, marginBottom: 20
+        borderRadius: 5, marginBottom: 20,
+        color: "white",
     },
 
     buttonContainer: { marginTop: 20 },
