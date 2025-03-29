@@ -1,20 +1,36 @@
 import { Training } from '@/types/entities';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
-import TrainingItem from './TrainingItem'; // Composant pour afficher un entraînement
+import TrainingItem from './TrainingItem';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-const ID_USER = 1; // TODO: Remplacer par l'ID du user connecté
 
 const TrainingList = ({ limit = 5 }: { limit?: number }) => {
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const storedUserId = await AsyncStorage.getItem('userId');
+                setUserId(storedUserId);
+            } catch (error) {
+                console.error("Erreur lors de la récupération de l'ID utilisateur:", error);
+            }
+        };
+
+        fetchUserId();
+    }, []);
 
     useEffect(() => {
         const fetchTrainings = async () => {
+            if (!userId) return;
+
             try {
-                const response = await fetch(`${API_URL}api/trainings/${ID_USER}?limit=${limit}`);
+                const response = await fetch(`${API_URL}api/trainings/${userId}?limit=${limit}`);
                 const data = await response.json();
                 setTrainings(data.trainings);
             } catch (error) {
@@ -25,7 +41,7 @@ const TrainingList = ({ limit = 5 }: { limit?: number }) => {
         };
 
         fetchTrainings();
-    }, [limit]); // Ajout de `limit` comme dépendance pour rafraîchir les données si elle change
+    }, [userId, limit]);
 
     if (loading) {
         return <ActivityIndicator size="large" color="#4CAF50" />;
