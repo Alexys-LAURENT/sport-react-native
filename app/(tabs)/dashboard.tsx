@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/fr';
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CurveType, LineChart, PieChart } from "react-native-gifted-charts";
 
 // TODO : change this to the current user id
@@ -82,8 +82,8 @@ export default function DashboardScreen() {
           });
           setTrainingOverDays(formatedTrainingOverDays)
           setCountTrainningsTypes(data.trainings)
-          setIsLoading(false)
         }
+        setIsLoading(false)
       } catch (error) {
         console.log('dashboard.tsx ',error);
       }
@@ -107,7 +107,7 @@ export default function DashboardScreen() {
       </ScrollView>
         {
           isLoading ? (
-            <Text style={{color:'#D9D9D9'}}>Loading...</Text>
+            <ActivityIndicator color="#D9D9D9" />
           ) : (
             <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', width: '100%', paddingBottom: 50, paddingLeft: 22, paddingRight: 22}}>
               <Text style={{color: '#D9D9D9', fontSize: 20, marginTop: 15}}>Heures d'entrainement</Text>
