@@ -53,7 +53,7 @@ const TrainingList = ({ limit }: { limit?: number }) => {
                 trainings.map((training) => <TrainingItem key={training.idTraining} training={training} />)
             ) : (
                 <View>
-                    <Text>Aucun entraînement</Text>
+                    <Text style={{ color:"white" }}>Aucun entraînement</Text>
                 </View>
             )}
         </ScrollView>

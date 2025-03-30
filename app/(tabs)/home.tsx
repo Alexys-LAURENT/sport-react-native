@@ -1,3 +1,4 @@
+import CustomButton from '@/components/CustomButton';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from '@/components/ThemedView';
@@ -128,9 +129,9 @@ export default function HomeScreen() {
         <TrainingList limit={5} key={`homepage-rerfresh-key-${refreshKey}`} />
 
         {/* Bouton Voir plus */}
-        <TouchableOpacity style={styles.seeMoreButton} onPress={() => router.push('/(tabs)/trainings')}>
-          <Text style={styles.seeMoreText}>Voir plus</Text>
-        </TouchableOpacity>
+        <View style={{ marginTop: 10 }}>
+          <CustomButton onPress={() => router.push('/(tabs)/trainings')} variant="secondary" title="Voir plus" />
+        </View>
 
         {/* Section motivation */}
         <ThemedText style={styles.subtitle} type="title">
@@ -138,12 +139,7 @@ export default function HomeScreen() {
         </ThemedText>
 
         {/* Bouton Commencer l'entraînement */}
-        <TouchableOpacity 
-          style={styles.startButton} 
-          onPress={() => !isTracking ? setModalVisible(true) : alert("Un entraînement est déjà en cours")}
-        >
-          <Text style={styles.startButtonText}>Commencer l'entrainement !</Text>
-        </TouchableOpacity>
+        <CustomButton onPress={() => !isTracking ? setModalVisible(true) : alert("Un entraînement est déjà en cours")} variant="primary" title="Commencer l'entrainement !" />
 
         {/* Modal de sélection de type d'entraînement */}
         <Modal

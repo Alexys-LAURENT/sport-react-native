@@ -1,8 +1,11 @@
+import CustomButton from "@/components/CustomButton";
+import CustomTextInput from "@/components/CustomTextInput";
 import { ThemedView } from "@/components/ThemedView";
+import { useAuth } from "@/context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -20,13 +23,6 @@ const ProfileHeader = ({ photo, fullName }: { photo: string; fullName: string })
         </View>
     );
 };
-
-const ProfileField = ({ label, value, onChangeText }: { label: string; value: string; onChangeText: (text: string) => void }) => (
-    <View>
-        <Text style={styles.textStyle}>{label}</Text>
-        <TextInput style={styles.input} onChangeText={onChangeText} value={value} />
-    </View>
-);
 
 // Nouveau composant pour la sélection de genre
 const GenderSelector = ({ label, value, onSelect }: { label: string; value: string; onSelect: (value: string) => void }) => (
@@ -61,11 +57,6 @@ const GenderSelector = ({ label, value, onSelect }: { label: string; value: stri
     </View>
 );
 
-const ActionButton = ({ title, onPress, color }: { title: string; onPress: () => void; color: string }) => (
-    <TouchableOpacity style={[styles.actionButton, { backgroundColor: color }]} onPress={onPress}>
-        <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-);
 
 export default function ProfileScreen() {
     const [user, setUser] = useState({ 
@@ -76,6 +67,8 @@ export default function ProfileScreen() {
         sexe: "", 
         photo: "" 
     });
+
+    const {logout} = useAuth();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -168,14 +161,34 @@ export default function ProfileScreen() {
         <ThemedView style={styles.mainContainer}>
             <View style={styles.mainView}>
                 <ProfileHeader photo={user.photo} fullName={`${user.prenom} ${user.nom}`} />
-                <ProfileField label="Prénom" value={user.prenom} onChangeText={(text) => setUser({ ...user, prenom: text })} />
-                <ProfileField label="Nom" value={user.nom} onChangeText={(text) => setUser({ ...user, nom: text })} />
-                <ProfileField label="Email" value={user.email} onChangeText={(text) => setUser({ ...user, email: text })} />
-                <GenderSelector label="Sexe" value={user.sexe} onSelect={(value) => setUser({ ...user, sexe: value })} />
+                <View style={{ gap : 10 }}>
+                    <CustomTextInput label="Prénom" value={user.prenom} onChangeText={(text) => setUser({ ...user, prenom: text })} />
+                    <CustomTextInput label="Nom" value={user.nom} onChangeText={(text) => setUser({ ...user, nom: text })} />
+                    <CustomTextInput label="Email" value={user.email} onChangeText={(text) => setUser({ ...user, email: text })} />
+                    <GenderSelector label="Sexe" value={user.sexe} onSelect={(value) => setUser({ ...user, sexe: value })} />
+                </View>
 
                 <View style={styles.buttonContainer}>
-                    <ActionButton title="Mettre à jour" onPress={handleUpdateAccount} color="#43A047" />
-                    <ActionButton title="Supprimer le compte" onPress={handleDeleteAccount} color="#D32F2F" />
+                    <CustomButton
+                        title="Mettre à jour"
+                        onPress={handleUpdateAccount}
+                        variant="primary"
+                    />
+                    <CustomButton
+                        title="Déconnexion"
+                        onPress={() => {
+                            Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
+                                { text: "Annuler", style: "cancel" },
+                                { text: "Déconnexion", onPress: () => logout() },
+                            ]);
+                        }}
+                        variant="danger"
+                    />
+                    <CustomButton
+                        title="Supprimer le compte"
+                        onPress={handleDeleteAccount}
+                        variant="danger"
+                    />
                 </View>
             </View>
         </ThemedView>
@@ -223,7 +236,9 @@ const styles = StyleSheet.create({
         color: "white",
     },
 
-    buttonContainer: { marginTop: 20 },
+    buttonContainer: { marginTop: 20, 
+        gap: 10,
+     },
 
     actionButton: {
         padding: 12,

@@ -4,16 +4,16 @@ import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react
 
 interface CustomButtonProps extends TouchableOpacityProps {
   title: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
 }
 
 const CustomButton = (props: CustomButtonProps) => {
   return (
     <TouchableOpacity 
-      style={props.variant === 'secondary' ? styles.buttonSecondary : styles.buttonPrimary}
+      style={props.variant === 'secondary' ? styles.buttonSecondary : props.variant === 'danger' ? styles.buttonDanger : styles.buttonPrimary}
       onPress={props.onPress}>
       <Text
-        style={props.variant === 'secondary' ? styles.textSecondary : styles.textPrimary}
+        style={props.variant === 'secondary' ? styles.textSecondary : props.variant === 'danger' ? styles.textDanger : styles.textPrimary}
       >
         {props.title}
       </Text>
@@ -44,6 +44,18 @@ const styles = StyleSheet.create({
   },
   textSecondary: {
     color: '#C6FF00',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'semibold',
+  },
+  buttonDanger: {
+    width: '100%',
+    backgroundColor: '#FF3D00',
+    borderRadius: 5,
+    paddingVertical: 12,
+  },
+  textDanger: {
+    color: '#FFFFFF',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'semibold',

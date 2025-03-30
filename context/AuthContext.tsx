@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
@@ -84,6 +84,13 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
     try {
       // Remove token from storage
       await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('userEmail');
+      await AsyncStorage.removeItem('userFirstName');
+      await AsyncStorage.removeItem('userLastName');
+      await AsyncStorage.removeItem('userGender');
+
+      router.replace('/login'); // Redirect to login page
 
       // Clear state
       setToken(null);
