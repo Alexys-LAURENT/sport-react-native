@@ -1,39 +1,39 @@
-import React from 'react';
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet } from "react-native";
-import { View, Image, Button } from "react-native";
 import { Link } from 'expo-router';
+import React from 'react';
+import { Image, StyleSheet, Text, View } from "react-native";
 
 export default function intro() {
     return (
         <ThemedView style={styles.mainContainer}>
-            <Image
+            <View style={{display:'flex', flexDirection:'column', height: '70%', justifyContent: 'center', alignItems: 'center', gap: 16}}>
+           <Image
                 style={styles.logo}
-                source={{uri: "https://static.wikia.nocookie.net/the-doom-in-our-blood-comes-back/images/6/6f/House_Targaryen_Emblem.png/revision/latest?cb=20231201125707"}}
+                source={ require('@/assets/images/splash-icon.png') } // Remplacez par le chemin vers votre image
             />
-            <View style={styles.but}>
+            <Text style={styles.titleStyle}>FitTrack</Text>
+            </View>
+            <View style={{display:'flex', flexDirection:'column', height: '30%', justifyContent: 'center', alignItems: 'center'}}>
                 <Link style={styles.button} href="/login">Connexion</Link>
-                <Link style={styles.button_bis} href="/signin">Inscription</Link>
+                <Link style={styles.button_bis} href="/signup">Inscription</Link>
             </View>
         </ThemedView>
     );
 }
   
 const styles = StyleSheet.create({
-    mainContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+    titleStyle: {
+        fontSize: 24,
         color: 'white',
     },
-    logo: {
-        width: 300,
-        height: 300,
-        bottom: 100,
+    mainContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
     },
-    but: {
-        position: 'absolute',
-        bottom: 100,
+    logo: {
+        width: 125,
+        height: 125,
     },
     button: {
         paddingLeft: 120,
