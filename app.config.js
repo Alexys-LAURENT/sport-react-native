@@ -15,6 +15,7 @@ export default {
     ios: {
       supportsTablet: true
     },
+    backgroundColor: "#161819",
     android: {
       config: {
         googleMaps: {
