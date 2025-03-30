@@ -1,10 +1,10 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import React, { createContext, ReactNode, useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import { Alert } from 'react-native';
 
-// Constante pour le nom de la tâche en arrière-plan
-const BACKGROUND_LOCATION_TASK = 'background-location-tracking';
+// Nom de la tâche en arrière-plan
+const BACKGROUND_LOCATION_TASK = 'background-location-task';
 
 // Interface pour le stockage des positions
 interface LocationData {
@@ -12,202 +12,202 @@ interface LocationData {
 }
 
 // Interface pour le contexte d'entraînement
+// Dans TrainingContext.tsx
 interface TrainingContextProps {
-    startTraining: () => Promise<void>;
-    stopTraining: () => Promise<void>;
-    text: string;
+    startTracking: () => Promise<void>;
+    stopTracking: () => Promise<void>;
+    setTrackingState: (isActive: boolean) => void; // Nouvelle méthode
+    locationStatus: string;
     isTracking: boolean;
+    currentLocation: Location.LocationObject | null;
 }
 
 // Création du contexte avec des valeurs par défaut
 const TrainingContext = createContext<TrainingContextProps>({
-    startTraining: async () => { },
-    stopTraining: async () => { },
-    text: 'En attente...',
-    isTracking: false
+    startTracking: async () => { },
+    stopTracking: async () => { },
+    setTrackingState: () => { },
+    locationStatus: 'Aucune localisation active',
+    isTracking: false,
+    currentLocation: null
 });
 
-// Définir la tâche en arrière-plan
-TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
-    if (error) {
-        console.error('Erreur dans la tâche en arrière-plan:', error);
-        return null;
-    }
-    if (data) {
-        const { locations } = data as LocationData;
-        if (locations && locations.length > 0) {
-            console.log('Position mise à jour en arrière-plan:', locations[0]);
-            // Ici vous pourriez envoyer les données à un serveur ou les stocker localement
+// Définir la tâche en arrière-plan si elle n'existe pas déjà
+if (!TaskManager.isTaskDefined(BACKGROUND_LOCATION_TASK)) {
+    TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
+        if (error) {
+            console.error('Erreur de la tâche en arrière-plan:', error);
+            return;
         }
-    }
-    return null;
-});
+        
+        if (data) {
+            const { locations } = data as LocationData;
+            if (locations && locations.length > 0) {
+                console.log('Position en arrière-plan:', locations[0]);
+                // Ici vous pourriez envoyer les données à un serveur ou les stocker
+            }
+        }
+    });
+}
 
 const TrainingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null);
+    const [locationStatus, setLocationStatus] = useState<string>('Aucune localisation active');
     const [isTracking, setIsTracking] = useState<boolean>(false);
-
-    // Référence pour l'intervalle de localisation
     const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Fonction pour obtenir les permissions de localisation
-    const requestLocationPermissions = async (): Promise<boolean> => {
-        try {
-            // Permission en premier plan
-            let { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-            if (foregroundStatus !== 'granted') {
-                setErrorMsg('Permission pour accéder à la localisation refusée');
-                return false;
-            }
 
-            // Permission en arrière-plan
-            let { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-            if (backgroundStatus !== 'granted') {
-                setErrorMsg('Permission pour accéder à la localisation en arrière-plan refusée');
-                return false;
-            }
-
-            return true;
-        } catch (error) {
-            setErrorMsg(`Erreur lors de la demande de permissions: ${error}`);
-            return false;
-        }
-    };
-
-    // Fonction pour obtenir la position actuelle
-    const getCurrentLocation = async () => {
-        try {
-            let location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.BestForNavigation
-            });
-            console.log('Position actuelle:', location);
-            setLocation(location);
-            setErrorMsg(null);
-        } catch (error) {
-            console.error('Erreur getCurrentLocation:', error);
-            setErrorMsg(`Erreur lors de la récupération de la position: ${error}`);
-        }
+    const setTrackingState = (isActive: boolean) => {
+        setIsTracking(isActive);
     };
 
     // Nettoyage lors du démontage du composant
     useEffect(() => {
         return () => {
-            stopTrainingInternal();
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+                locationIntervalRef.current = null;
+            }
+            
+            // Tenter d'arrêter le suivi en arrière-plan si actif
+            Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)
+                .then(hasStarted => {
+                    if (hasStarted) {
+                        Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)
+                            .catch(error => console.error('Erreur lors de l\'arrêt du tracking:', error));
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la vérification du statut:', error));
         };
     }, []);
 
-    // Fonction interne pour arrêter l'entraînement
-    const stopTrainingInternal = async () => {
-        console.log('Arrêt interne de l\'entraînement');
-
-        // Arrêter l'intervalle de mise à jour
-        if (locationIntervalRef.current) {
-            clearInterval(locationIntervalRef.current);
-            locationIntervalRef.current = null;
-        }
-
-        // Arrêter le suivi en arrière-plan
+    // Fonction pour demander les permissions de localisation
+    const requestPermissions = async (): Promise<boolean> => {
         try {
-            const hasStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
-            if (hasStarted) {
-                console.log('Arrêt du suivi en arrière-plan');
-                await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
+            // Permission de premier plan
+            const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+            if (foregroundStatus !== 'granted') {
+                Alert.alert(
+                    'Permission requise',
+                    'L\'application a besoin d\'accéder à votre localisation pour suivre votre entraînement.',
+                    [{ text: 'OK' }]
+                );
+                setLocationStatus('Permission de localisation refusée');
+                return false;
             }
-        } catch (error) {
-            console.error('Erreur lors de l\'arrêt du suivi en arrière-plan:', error);
-        }
 
-        setIsTracking(false);
+            // Permission d'arrière-plan
+            const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+            if (backgroundStatus !== 'granted') {
+                Alert.alert(
+                    'Permission d\'arrière-plan',
+                    'Pour suivre votre position même lorsque l\'application est en arrière-plan, veuillez autoriser l\'accès en arrière-plan.',
+                    [{ text: 'OK' }]
+                );
+                // Continuer même sans permission d'arrière-plan
+                setLocationStatus('Permission d\'arrière-plan refusée, suivi limité');
+                return true;
+            }
+
+            setLocationStatus('Permissions accordées');
+            return true;
+        } catch (error) {
+            console.error('Erreur de permission:', error);
+            setLocationStatus(`Erreur: ${error}`);
+            return false;
+        }
     };
 
-    // Fonction pour démarrer l'entraînement
-    const startTraining = async () => {
-        console.log('Démarrage de l\'entraînement');
+    // Fonction pour obtenir la position actuelle
+    const updateCurrentLocation = async () => {
+        try {
+            console.log("Tentative de mise à jour de la position...");
+            const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.BestForNavigation,
+            });
+            console.log("Nouvelle position obtenue:", 
+                location.coords.latitude, 
+                location.coords.longitude,
+                "timestamp:", new Date().toISOString()
+            );
+            setCurrentLocation(location);
+            setLocationStatus('Position mise à jour à ' + new Date().toLocaleTimeString());
+        } catch (error) {
+            console.error('Erreur de localisation:', error);
+            setLocationStatus(`Erreur de localisation: ${error}`);
+        }
+    };
 
-        // Éviter de démarrer plusieurs fois
+    // Fonction pour démarrer le suivi de localisation
+    const startTracking = async () => {
         if (isTracking) {
-            console.log('Entraînement déjà en cours');
+            Alert.alert('Info', 'Le suivi est déjà actif');
             return;
         }
 
         // Demander les permissions
-        const permissionsGranted = await requestLocationPermissions();
+        const permissionsGranted = await requestPermissions();
         if (!permissionsGranted) {
-            console.log('Permissions refusées');
             return;
         }
 
-        // Assurer que tout précédent suivi est arrêté
-        await stopTrainingInternal();
-
         try {
             // Obtenir la position initiale
-            await getCurrentLocation();
+            await updateCurrentLocation();
+            setLocationStatus('Démarrage du suivi en premier plan uniquement...');
 
-            // Démarrer le suivi en arrière-plan
-            console.log('Démarrage du suivi en arrière-plan');
-            const options: Location.LocationTaskOptions = {
-                accuracy: Location.Accuracy.BestForNavigation,
-                timeInterval: 1000, // Mise à jour toutes les secondes
-                distanceInterval: 0, // Mise à jour même sans déplacement
-                deferredUpdatesInterval: 1000, // Pour iOS
-                deferredUpdatesDistance: 0, // Pour iOS
-                showsBackgroundLocationIndicator: true, // Pour iOS
-                pausesUpdatesAutomatically: false,
-            };
-
-            // Ajouter le foregroundService uniquement sur Android et si app.json est configuré
-            if (Platform.OS === 'android') {
-                try {
-                    const { status } = await Location.getForegroundPermissionsAsync();
-                    if (status === 'granted') {
-                        options.foregroundService = {
-                            notificationTitle: 'Suivi d\'entraînement actif',
-                            notificationBody: 'Votre position est suivie en temps réel',
-                            notificationColor: '#FF0000'
-                        };
-                    } else {
-                        console.log('Foreground permissions non accordées, tracking uniquement en premier plan');
-                    }
-                } catch (error) {
-                    console.log('Impossible de vérifier les permissions de foreground:', error);
-                }
-            }
-
-            await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, options);
-
-            // Configurer l'intervalle pour les mises à jour en premier plan
-            locationIntervalRef.current = setInterval(async () => {
-                await getCurrentLocation();
-            }, 1000);
-
+            // Solution temporaire : utiliser uniquement le suivi en premier plan
+            // sans démarrer le service d'arrière-plan qui cause l'erreur
+            locationIntervalRef.current = setInterval(updateCurrentLocation, 2000);
+            
             setIsTracking(true);
-            console.log('Entraînement démarré avec succès');
+            setLocationStatus('Suivi actif (premier plan uniquement)');
         } catch (error) {
-            console.error('Erreur lors du démarrage de l\'entraînement:', error);
-            setErrorMsg(`Erreur lors du démarrage de l'entraînement: ${error}`);
-            await stopTrainingInternal();
+            console.error('Erreur de démarrage:', error);
+            setLocationStatus(`Erreur de démarrage: ${error}`);
+            
+            // Nettoyer en cas d'erreur
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+                locationIntervalRef.current = null;
+            }
         }
     };
 
-    // Fonction pour arrêter l'entraînement (version exposée)
-    const stopTraining = async () => {
-        console.log('Demande d\'arrêt d\'entraînement');
-        await stopTrainingInternal();
-        console.log('Entraînement arrêté avec succès');
+    // Fonction pour arrêter le suivi
+    const stopTracking = async () => {
+        try {
+            // Arrêter l'intervalle
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+                locationIntervalRef.current = null;
+            }
+
+            // Vérifier si le suivi est actif avant d'essayer de l'arrêter
+            const hasStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
+            if (hasStarted) {
+                await Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
+            }
+
+            setIsTracking(false);
+            setLocationStatus('Suivi arrêté');
+        } catch (error) {
+            console.error('Erreur lors de l\'arrêt du suivi:', error);
+            setLocationStatus(`Erreur d'arrêt: ${error}`);
+        }
     };
 
-    // Préparer le texte pour le contexte
-    let text = 'En attente...';
-    if (errorMsg) {
-        text = errorMsg;
-    } else if (location) {
-        text = JSON.stringify(location);
-    }
-
     return (
-        <TrainingContext.Provider value={{ startTraining, stopTraining, text, isTracking }}>
+        <TrainingContext.Provider 
+            value={{ 
+                startTracking, 
+                stopTracking, 
+                locationStatus, 
+                setTrackingState,
+                isTracking, 
+                currentLocation 
+            }}
+        >
             {children}
         </TrainingContext.Provider>
     );

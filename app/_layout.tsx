@@ -49,6 +49,16 @@ export default function RootLayout() {
                 }
               })}
             />
+            <Stack.Screen name="post-training/[id_training]"
+              options={({ route }: { route: any }) => ({
+                headerTitle: route.params?.date ?
+                  `Entrainement du ${new Date(route.params.date).toLocaleDateString()}` :
+                  'Entrainement',
+                headerTitleStyle: {
+                  fontSize: 16,
+                }
+              })}
+            />
             <Stack.Screen name="+not-found" />
           </Stack>
         </TrainingProvider>

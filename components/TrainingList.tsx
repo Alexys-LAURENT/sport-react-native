@@ -7,7 +7,7 @@ import TrainingItem from './TrainingItem';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const TrainingList = ({ limit = 5 }: { limit?: number }) => {
+const TrainingList = ({ limit }: { limit?: number }) => {
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [userId, setUserId] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const TrainingList = ({ limit = 5 }: { limit?: number }) => {
             if (!userId) return;
 
             try {
-                const response = await fetch(`${API_URL}api/trainings/${userId}?limit=${limit}`);
+                const response = await fetch(`${API_URL}api/trainings/${userId}${limit ? `?limit=${limit}` : ''}`);
                 const data = await response.json();
                 setTrainings(data.trainings);
             } catch (error) {

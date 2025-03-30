@@ -28,6 +28,39 @@ const ProfileField = ({ label, value, onChangeText }: { label: string; value: st
     </View>
 );
 
+// Nouveau composant pour la sélection de genre
+const GenderSelector = ({ label, value, onSelect }: { label: string; value: string; onSelect: (value: string) => void }) => (
+    <View>
+        <Text style={styles.textStyle}>{label}</Text>
+        <View style={styles.selectorContainer}>
+            <TouchableOpacity 
+                style={[
+                    styles.genderOption, 
+                    value === "Homme" && styles.selectedGender
+                ]} 
+                onPress={() => onSelect("Homme")}
+            >
+                <Text style={[
+                    styles.genderText, 
+                    value === "Homme" && styles.selectedGenderText
+                ]}>Homme</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+                style={[
+                    styles.genderOption, 
+                    value === "Femme" && styles.selectedGender
+                ]} 
+                onPress={() => onSelect("Femme")}
+            >
+                <Text style={[
+                    styles.genderText, 
+                    value === "Femme" && styles.selectedGenderText
+                ]}>Femme</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
 const ActionButton = ({ title, onPress, color }: { title: string; onPress: () => void; color: string }) => (
     <TouchableOpacity style={[styles.actionButton, { backgroundColor: color }]} onPress={onPress}>
         <Text style={styles.buttonText}>{title}</Text>
@@ -80,17 +113,41 @@ export default function ProfileScreen() {
         ]);
     };
 
-    const updateUser = () => {
-        fetch(`${API_URL}update/${user.idUser}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user),
-        })
-            .then((response) => response.json())
-            .then((data) => Alert.alert("Succès", "Profil mis à jour avec succès !"))
-            .catch(() => Alert.alert("Erreur", "Échec de la mise à jour."));
+    const updateUser = async () => {
+        try {
+            const response = await fetch(`${API_URL}update/${user.idUser}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(user),
+            });
+            
+            console.log("Response:", response);
+            
+            // Log the raw response text first
+            const responseText = await response.text();
+            console.log("Response text:", responseText);
+            
+            // Only try to parse as JSON if it looks like JSON
+            let data;
+            if (responseText.startsWith('{') || responseText.startsWith('[')) {
+                try {
+                    data = JSON.parse(responseText);
+                    console.log("User updated:", data);
+                    Alert.alert("Succès", "Profil mis à jour avec succès !");
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                    Alert.alert("Succès", "Profil mis à jour, mais les détails n'ont pas pu être affichés.");
+                }
+            } else {
+                console.log("Non-JSON response:", responseText);
+                Alert.alert("Succès", "Profil mis à jour avec succès !");
+            }
+        } catch (error) {
+            console.error("Error updating user:", error);
+            Alert.alert("Erreur", "Échec de la mise à jour.");
+        }
     };
-
+    
     const handleDeleteAccount = () => {
         Alert.alert("Supprimer le compte", "Cette action est irréversible. Confirmez-vous la suppression ?", [
             { text: "Annuler", style: "cancel" },
@@ -114,7 +171,7 @@ export default function ProfileScreen() {
                 <ProfileField label="Prénom" value={user.prenom} onChangeText={(text) => setUser({ ...user, prenom: text })} />
                 <ProfileField label="Nom" value={user.nom} onChangeText={(text) => setUser({ ...user, nom: text })} />
                 <ProfileField label="Email" value={user.email} onChangeText={(text) => setUser({ ...user, email: text })} />
-                <ProfileField label="Sexe" value={user.sexe} onChangeText={(text) => setUser({ ...user, sexe: text })} />
+                <GenderSelector label="Sexe" value={user.sexe} onSelect={(value) => setUser({ ...user, sexe: value })} />
 
                 <View style={styles.buttonContainer}>
                     <ActionButton title="Mettre à jour" onPress={handleUpdateAccount} color="#43A047" />
@@ -180,4 +237,33 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold"
     },
+    
+    // Nouveaux styles pour le sélecteur de genre
+    selectorContainer: {
+        flexDirection: "row",
+        marginBottom: 20
+    },
+    
+    genderOption: {
+        flex: 1,
+        height: 45,
+        borderWidth: 1,
+        borderColor: "grey",
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 5
+    },
+    
+    genderText: {
+        color: "white"
+    },
+    
+    selectedGender: {
+        backgroundColor: "#555",
+        borderColor: "#fff"
+    },
+    
+    selectedGenderText: {
+        fontWeight: "bold"
+    }
 });

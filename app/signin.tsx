@@ -31,7 +31,8 @@ export default function signin() {
             if (response.ok) {
                 const data = await response.json();
                 console.log("Token JWT :", data.token);
-                router.push("/(tabs)/home");
+                // router.push("/(tabs)/home");
+                router.push("/login");
             } else {
                 const data = await response.json();
                 alert("Identifiants déjà utilisé");

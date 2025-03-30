@@ -2,13 +2,16 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from '@/components/ThemedView';
 import TrainingList from "@/components/TrainingList";
+import { TrainingContext } from '@/context/TrainingContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
+
 
 // Training types data
 const trainingTypes = [
@@ -22,7 +25,25 @@ const trainingTypes = [
 
 export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const {isTracking} = useContext(TrainingContext);
   const router = useRouter();
+  
+
+  useFocusEffect(
+    useCallback(() => {
+      // Cette fonction sera appelée chaque fois que l'écran est focalisé
+      setRefreshKey(prevKey => prevKey + 1);
+      
+      return () => {
+        // Nettoyage si nécessaire quand l'écran perd le focus
+      };
+    }, [])
+  );
+
+  // Utilisation du contexte de suivi
+  const { startTracking, setTrackingState } = useContext(TrainingContext);
+
 
   const handleTrainingTypeSelect = async (type: any) => {
     try {
@@ -64,6 +85,13 @@ export default function HomeScreen() {
       // Parse the response
       const createdTraining = await response.json();
       console.log('Created training:', createdTraining);
+
+      if (type.id === 1 || type.id === 2) {
+        startTracking()
+      } else {
+        setTrackingState(true);
+      }
+      
   
       // Close the modal
       setModalVisible(false);
@@ -97,10 +125,10 @@ export default function HomeScreen() {
           Vos derniers entraînements 💪
         </ThemedText>
 
-        <TrainingList limit={5} />
+        <TrainingList limit={5} key={`homepage-rerfresh-key-${refreshKey}`} />
 
         {/* Bouton Voir plus */}
-        <TouchableOpacity style={styles.seeMoreButton}>
+        <TouchableOpacity style={styles.seeMoreButton} onPress={() => router.push('/(tabs)/trainings')}>
           <Text style={styles.seeMoreText}>Voir plus</Text>
         </TouchableOpacity>
 
@@ -112,7 +140,7 @@ export default function HomeScreen() {
         {/* Bouton Commencer l'entraînement */}
         <TouchableOpacity 
           style={styles.startButton} 
-          onPress={() => setModalVisible(true)}
+          onPress={() => !isTracking ? setModalVisible(true) : alert("Un entraînement est déjà en cours")}
         >
           <Text style={styles.startButtonText}>Commencer l'entrainement !</Text>
         </TouchableOpacity>

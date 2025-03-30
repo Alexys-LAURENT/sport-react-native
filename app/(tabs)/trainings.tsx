@@ -1,17 +1,31 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import TrainingList from "@/components/TrainingList";
-import React from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import { StyleSheet } from "react-native";
 
 
 export default function TrainingsScreen() {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+    useFocusEffect(
+      useCallback(() => {
+        // Cette fonction sera appelée chaque fois que l'écran est focalisé
+        setRefreshKey(prevKey => prevKey + 1);
+        
+        return () => {
+          // Nettoyage si nécessaire quand l'écran perd le focus
+        };
+      }, [])
+    );
+
   return (
     <ThemedView style={styles.mainContainer}>
         {/* Title */}
         <ThemedText style={styles.titleContainer} type="title">Vos derniers entrainements 💪</ThemedText>
 
-        <TrainingList/>
+        <TrainingList key={refreshKey} />
 
     </ThemedView>
     );
@@ -32,6 +46,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 32,
+        paddingVertical: 32,
+        paddingHorizontal: 22,
     },
 });
