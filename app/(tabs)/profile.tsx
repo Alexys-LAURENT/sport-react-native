@@ -4,6 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from 'expo-constants';
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -149,7 +150,11 @@ export default function ProfileScreen() {
             method: "DELETE",
         })
             .then((response) => response.json())
-            .then(() => Alert.alert("Compte supprimé", "Votre compte a été supprimé avec succès."))
+            .then(() => {
+            logout();
+            Alert.alert("Compte supprimé", "Votre compte a été supprimé avec succès.")
+            router.push("/login");
+            })
             .catch(() => Alert.alert("Erreur", "Impossible de supprimer le compte."));
     };
 

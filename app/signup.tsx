@@ -49,8 +49,7 @@ export default function Signup() {
             });
 
             if (response.ok) {
-                const data = await response.json();
-                router.push("/(tabs)/home");
+                router.push("/login");
             } else {
                 Alert.alert("Erreur", "Identifiants déjà utilisés");
                 console.error("Erreur", "Identifiants déjà utilisés");
