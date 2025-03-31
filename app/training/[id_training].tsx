@@ -48,12 +48,17 @@ export default function TrainingScreen() {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // Fonction pour mettre à jour le timer
     const updateTimer = () => {
         if (training) {
             const start = new Date(training.startedDate);
             const now = new Date();
             const diffMs = now.getTime() - start.getTime();
+            
+            // Si la différence est négative, afficher 00:00:00
+            if (diffMs < 0) {
+                setTimer('00:00:00');
+                return;
+            }
             
             const hours = Math.floor(diffMs / (1000 * 60 * 60));
             const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -277,9 +282,9 @@ export default function TrainingScreen() {
                     <Text style={styles.infoLabel}>
                         ⏲️ <Text style={styles.boldText}>Durée :</Text> {formatDuration(training.startedDate, new Date(training.endedDate))}
                     </Text>
-                    <Text style={styles.infoLabel}>
+                    {training.calories > 0 && <Text style={styles.infoLabel}>
                         🔥 <Text style={styles.boldText}>Kcal dépensées : </Text> {training.calories} kcal
-                    </Text>
+                    </Text>}
                     <Text style={styles.infoLabel}>
                         ⚡ <Text style={styles.boldText}>Difficulté :</Text> {training.difficulty.slice(0, 1).toUpperCase() + training.difficulty.slice(1).toLowerCase()}
                     </Text>
