@@ -152,7 +152,6 @@ export default function TrainingScreen() {
                         }),
                     });
 
-                    console.log("Réponse envoi position:", res.status);
                 } catch (error) {
                     console.error('Erreur lors de l\'envoi de la position:', error);
                 }
@@ -173,7 +172,6 @@ export default function TrainingScreen() {
                 // Pour les autres types d'entraînement, ne pas activer le GPS
                 // mais marquer comme démarré dans l'UI
                 setTrackingState(true);
-                console.log("Entraînement sans GPS démarré");
             }
         } catch (error) {
             console.error('Erreur lors du démarrage:', error);
@@ -189,7 +187,6 @@ export default function TrainingScreen() {
         } else {
             // Pour les autres types, juste arrêter dans l'UI
             setTrackingState(false);
-            console.log("Entraînement sans GPS arrêté");
         }
     };
     // Gestion des actions d'entraînement

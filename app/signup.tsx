@@ -50,11 +50,10 @@ export default function Signup() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("Token JWT :", data.token);
                 router.push("/(tabs)/home");
             } else {
                 Alert.alert("Erreur", "Identifiants déjà utilisés");
-                console.log("Erreur", "Identifiants déjà utilisés");
+                console.error("Erreur", "Identifiants déjà utilisés");
             }
         } catch (error) {
             console.error("Erreur d'inscription :", error);

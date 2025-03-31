@@ -62,7 +62,6 @@ export default function DashboardScreen() {
       months.push(date);
       
       if(i === 0) {
-        console.log(date);
         setSelectedMonth(date)
       }
     }
@@ -83,7 +82,6 @@ export default function DashboardScreen() {
         if(month === undefined || year === undefined) {
           return
         }
-        console.log(API_URL+`api/dashboard/${userId}/${month+1}/${year}`);
         
         const res =  await fetch(API_URL+`api/dashboard/${userId}/${month+1}/${year}`)
         
@@ -103,7 +101,7 @@ export default function DashboardScreen() {
         }
         setIsLoading(false)
       } catch (error) {
-        console.log('dashboard.tsx ',error);
+        console.error('dashboard.tsx ',error);
       }
     }
     fetchData()

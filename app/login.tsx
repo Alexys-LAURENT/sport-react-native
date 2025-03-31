@@ -47,7 +47,6 @@ export default function Login() {
             const data = await response.json();
 
             if (response.ok) {
-                console.log('Login successful:', data);
                 // Store the JWT token securely
                 await AsyncStorage.setItem('userToken', data.token);
             

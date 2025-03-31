@@ -62,7 +62,6 @@ export default function HomeScreen() {
         idTrainingType: type.id
       };
   
-      console.log('Sending training creation request:', trainingData);
   
       // Send request to create training
       const response = await fetch(`${API_URL}api/trainings/create`, {
@@ -73,7 +72,6 @@ export default function HomeScreen() {
         body: JSON.stringify(trainingData)
       });
   
-      console.log('Response status:', response.status);
   
       if (!response.ok) {
         // Try to get error details
@@ -85,7 +83,6 @@ export default function HomeScreen() {
   
       // Parse the response
       const createdTraining = await response.json();
-      console.log('Created training:', createdTraining);
 
       if (type.id === 1 || type.id === 2) {
         startTracking()

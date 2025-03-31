@@ -114,25 +114,21 @@ export default function ProfileScreen() {
                 body: JSON.stringify(user),
             });
             
-            console.log("Response:", response);
             
             // Log the raw response text first
             const responseText = await response.text();
-            console.log("Response text:", responseText);
             
             // Only try to parse as JSON if it looks like JSON
             let data;
             if (responseText.startsWith('{') || responseText.startsWith('[')) {
                 try {
                     data = JSON.parse(responseText);
-                    console.log("User updated:", data);
                     Alert.alert("Succès", "Profil mis à jour avec succès !");
                 } catch (error) {
                     console.error("Error parsing JSON:", error);
                     Alert.alert("Succès", "Profil mis à jour, mais les détails n'ont pas pu être affichés.");
                 }
             } else {
-                console.log("Non-JSON response:", responseText);
                 Alert.alert("Succès", "Profil mis à jour avec succès !");
             }
         } catch (error) {

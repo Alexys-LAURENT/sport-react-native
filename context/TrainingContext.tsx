@@ -39,14 +39,6 @@ if (!TaskManager.isTaskDefined(BACKGROUND_LOCATION_TASK)) {
             console.error('Erreur de la tâche en arrière-plan:', error);
             return;
         }
-        
-        if (data) {
-            const { locations } = data as LocationData;
-            if (locations && locations.length > 0) {
-                console.log('Position en arrière-plan:', locations[0]);
-                // Ici vous pourriez envoyer les données à un serveur ou les stocker
-            }
-        }
     });
 }
 
@@ -121,11 +113,10 @@ const TrainingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Fonction pour obtenir la position actuelle
     const updateCurrentLocation = async () => {
         try {
-            console.log("Tentative de mise à jour de la position...");
             const location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.BestForNavigation,
             });
-            console.log("Nouvelle position obtenue:", 
+            console.info("Nouvelle position obtenue:", 
                 location.coords.latitude, 
                 location.coords.longitude,
                 "timestamp:", new Date().toISOString()
