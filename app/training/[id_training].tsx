@@ -2,7 +2,7 @@ import { Map } from '@/components/map/Map';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TrainingContext } from '@/context/TrainingContext';
 import Constants from 'expo-constants';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -23,7 +23,7 @@ interface Training {
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function TrainingScreen() {
-    const { id_training } = useLocalSearchParams<{ id_training: string }>();
+    const { id_training, trackingAlreadyInitialized } = useLocalSearchParams<{ id_training: string ; trackingAlreadyInitialized?:string }>();
     const trainingId = id_training ? parseInt(id_training) : null;
     const [training, setTraining] = useState<Training | null>(null);
     const [waypoints, setWaypoints] = useState<any[] | null>(null);
@@ -88,7 +88,7 @@ export default function TrainingScreen() {
     }, [training, isRealTime]);
 
     // Charger les données de l'entraînement
-    useFocusEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             if (!trainingId) {
                 setLoading(false);
@@ -113,8 +113,10 @@ export default function TrainingScreen() {
                     })
                 }
                 setTraining(data.trainingInfo);
-                if(!data.trainingInfo.endedDate && !isTracking){
-                    startTrackingBasedOnType()
+                
+                // Si l'entraînement n'est pas terminé et que le suivi n'est pas actif (principalement après un rechargement de l'application)
+                if(!data.trainingInfo.endedDate && !isTracking && trackingAlreadyInitialized !== "true") {
+                    startTrackingBasedOnType(data.trainingInfo.idTrainingType);
                 }
                 setIsRealTime(data.trainingInfo?.endedDate === "");
                 setWaypoints(data.waypoints || []);
@@ -130,14 +132,14 @@ export default function TrainingScreen() {
         };
 
         fetchData();
-    });
+    },[]);
 
     // Envoyer la position actuelle à l'API
     useEffect(() => {
         const sendLocationToAPI = async () => {
             if (currentLocation && isRealTime && training && (training.idTrainingType === 1 || training.idTrainingType === 2)) {
                 try {
-                    const res = await fetch(`${API_URL}api/geo`, {
+                    await fetch(`${API_URL}api/geo`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -162,11 +164,12 @@ export default function TrainingScreen() {
     }, [currentLocation, isRealTime, training, trainingId]);
 
 
-    // Fonction pour démarrer le tracking spécifique au type d'entraînement
-    const startTrackingBasedOnType = async () => {
+    // Fonction pour démarrer le tracking directement depuis la page au cas où l'application a été fermée et donc que le contexte s'est réinitialisé
+    const startTrackingBasedOnType = async (idTrainingType:number) => {
+        
         try {
-            if (training && (training.idTrainingType === 1 || training.idTrainingType === 2)) {
-                // Pour les types 1 et 2 (courses, randonnées, etc.), activer le tracking GPS
+            if (idTrainingType === 1 || idTrainingType === 2) {
+                // Pour les types 1 et 2 (courses, randonnées), activer le tracking GPS
                 await startTracking();
             } else {
                 // Pour les autres types d'entraînement, ne pas activer le GPS
@@ -189,8 +192,8 @@ export default function TrainingScreen() {
             setTrackingState(false);
         }
     };
-    // Gestion des actions d'entraînement
-    const handleTrainingAction = () => {
+    // Mettre fin définitivement à l'entraînement
+    const endTraining = () => {
         if (isTracking) {
             // Confirmation avant d'arrêter
             Alert.alert(
@@ -220,19 +223,6 @@ export default function TrainingScreen() {
                                 }
                             });
                         }
-                    }
-                ]
-            );
-        } else {
-            // Démarrer le suivi
-            Alert.alert(
-                'Démarrer l\'entraînement',
-                'Commencer le suivi de cet entraînement ?',
-                [
-                    { text: 'Annuler', style: 'cancel' },
-                    { 
-                        text: 'Démarrer', 
-                        onPress: () => startTrackingBasedOnType()
                     }
                 ]
             );
@@ -373,7 +363,7 @@ export default function TrainingScreen() {
                                 styles.actionButton, 
                                 isTracking ? styles.stopButton : styles.startButton
                             ]} 
-                            onPress={handleTrainingAction}
+                            onPress={endTraining}
                         >
                             <Text style={styles.actionButtonText}>
                             Arrêter l'entraînement

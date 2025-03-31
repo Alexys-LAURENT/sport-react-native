@@ -85,7 +85,7 @@ export default function HomeScreen() {
       const createdTraining = await response.json();
 
       if (type.id === 1 || type.id === 2) {
-        startTracking()
+        startTracking();
       } else {
         setTrackingState(true);
       }
@@ -99,7 +99,9 @@ export default function HomeScreen() {
         pathname: "/training/[id_training]",
         params: {
           id_training: createdTraining.id,
+          trackingAlreadyInitialized:'true'
         }
+        
       });
   
     } catch (error:any) {

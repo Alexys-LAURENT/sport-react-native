@@ -173,7 +173,7 @@ const TrainingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
                 clearInterval(locationIntervalRef.current);
                 locationIntervalRef.current = null;
             }
-
+            
             // Vérifier si le suivi est actif avant d'essayer de l'arrêter
             const hasStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
             if (hasStarted) {
