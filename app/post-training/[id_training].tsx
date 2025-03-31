@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Constants from 'expo-constants';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
-import {router, useLocalSearchParams} from "expo-router";
+import Constants from 'expo-constants';
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -11,6 +10,7 @@ export default function TrainingFeedbackScreen() {
     const { id_training } = useLocalSearchParams<{ id_training: string }>();
     const [difficultyIndex, setDifficultyIndex] = useState(2);
     const [feeling, setFeeling] = useState('');
+    const [calories, setCalories] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const difficultyLabels = ['très facile', 'facile', 'modéré', 'difficile', 'très difficile'];
@@ -30,6 +30,7 @@ export default function TrainingFeedbackScreen() {
                 },
                 body: JSON.stringify({
                     difficulty:difficulty,
+                    calories:calories||0,
                     feeling:feeling||"",
                 }),
             });
@@ -79,6 +80,15 @@ export default function TrainingFeedbackScreen() {
                     ))}
                 </View>
             </View>
+
+            <Text style={styles.label}>🔥 Calories dépensées :</Text>
+            <TextInput
+                style={styles.caloriesInput}
+                placeholder="Calories dépensées"
+                keyboardType="numeric"
+                value={calories.toString()}
+                onChangeText={(text) => setCalories(Number(text))}
+            />
 
             <View style={styles.feedbackContainer}>
                 <Text style={styles.label}>? Votre ressenti :</Text>
@@ -147,15 +157,29 @@ const styles = StyleSheet.create({
         color: '#CCFF00',
         fontWeight: 'bold',
     },
+    caloriesInput: {
+        backgroundColor:'#1E2021',
+        width: '100%',
+        height: 50,
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 5,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        color: '#FFFFFF',
+        marginBottom: 15,
+    },
     feedbackContainer: {
         marginBottom: 30,
     },
     feedbackInput: {
-        backgroundColor: '#222222',
-        borderRadius: 10,
-        padding: 15,
-        color: '#FFFFFF',
+        backgroundColor:'#1E2021',
+        width: '100%',
         height: 120,
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 5,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        color: '#FFFFFF',
         textAlignVertical: 'top',
     },
     errorText: {

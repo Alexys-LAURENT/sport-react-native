@@ -43,7 +43,7 @@ const TrainingItem = ({ training }: { training: Training }) => {
                 <View>
                     {
                         training.endedDate ? (
-                            training.calories && <Text style={{ color: '#D9D9D9' }}>{training.calories} Kcal</Text>
+                            training.calories > 0 && <Text style={{ color: '#D9D9D9' }}>{training.calories} Kcal</Text>
                         ) : (
                             <Text style={{ color: '#C6FF00' }}>En cours</Text>
                         )
