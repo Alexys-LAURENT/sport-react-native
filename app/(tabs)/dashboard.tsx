@@ -1,4 +1,5 @@
 import { ThemedView } from "@/components/ThemedView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/fr';
 import Constants from 'expo-constants';
@@ -6,8 +7,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CurveType, LineChart, PieChart } from "react-native-gifted-charts";
 
-// TODO : change this to the current user id
-const ID_USER = 1
+
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 type CountTrainingsTypes = {
   type: string;
@@ -36,6 +36,22 @@ export default function DashboardScreen() {
   const [trainingOverDays, setTrainingOverDays] = useState<CaloriesOverDaysFormatted[]>([])
   const [totalHours, setTotalHours] = useState(0)
 
+
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+      const fetchUserId = async () => {
+          try {
+              const storedUserId = await AsyncStorage.getItem('userId');
+              setUserId(storedUserId);
+          } catch (error) {
+              console.error("Erreur lors de la récupération de l'ID utilisateur:", error);
+          }
+      };
+
+      fetchUserId();
+  }, []);
+
   useEffect(() => {
 
   const getLastMonths = (total:number) => {
@@ -57,6 +73,7 @@ export default function DashboardScreen() {
   }, [])
 
   useEffect(() => {
+    if (!userId) return;
     const fetchData = async () => {
       setIsLoading(true)
       try {
@@ -66,8 +83,9 @@ export default function DashboardScreen() {
         if(month === undefined || year === undefined) {
           return
         }
+        console.log(API_URL+`api/dashboard/${userId}/${month+1}/${year}`);
         
-        const res =  await fetch(API_URL+`api/dashboard/${ID_USER}/${month+1}/${year}`)
+        const res =  await fetch(API_URL+`api/dashboard/${userId}/${month+1}/${year}`)
         
         const data = await res.json()
 
@@ -89,7 +107,7 @@ export default function DashboardScreen() {
       }
     }
     fetchData()
-  }, [selectedMonth])
+  }, [selectedMonth, userId])
 
 
   return (
@@ -129,7 +147,7 @@ export default function DashboardScreen() {
                     }}
                     radius={50}
                     textSize={20}
-                    data={totalCalories > 0 ? [{value: totalCalories }] : [{ value : 1}]} />
+                    data={totalCalories > 0 ? [{value: totalCalories, color : '#fcb346' }] : [{ value : 1, color : '#4d5254'}]} />
                     <Text style={{color: '#D9D9D9', fontSize: 14, marginLeft : 10}}>{totalCalories > 0 ? 'Calories' : 'Aucune calorie ce mois ci'}</Text>
                 </View>             
                 {/* Trainings types donut */}
@@ -146,7 +164,7 @@ export default function DashboardScreen() {
                       )
                     }}
                     radius={50}
-                    data={countTrainningsTypes.length > 0 ? countTrainningsTypes.map((training)=> ({value: training.count, text: training.type, color: training.color})) : [{ value : 1, text : 'Aucune séance ce mois ci'}]} />
+                    data={countTrainningsTypes.length > 0 ? countTrainningsTypes.map((training)=> ({value: training.count, text: training.type, color: training.color})) : [{ value : 1, text : 'Aucune séance ce mois ci', color : '#4d5254'}]} />
                     <View style={{display: 'flex', flexDirection: 'column', gap: 10, marginLeft: 10}}>
                       {countTrainningsTypes.length > 0 ? countTrainningsTypes.map((training, index) => (
                         <View key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>

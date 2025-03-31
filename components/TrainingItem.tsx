@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 
 const TrainingItem = ({ training }: { training: Training }) => {
-
+    console.log(training);
     const getDuration = (startedDate: string, endedDate: string) => {
         const started = dayjs(startedDate);
         const ended = dayjs(endedDate);
@@ -34,7 +34,7 @@ const TrainingItem = ({ training }: { training: Training }) => {
                         <Text style={{ color: '#D9D9D9', fontSize: 20 }}>{training.icon} {training.label}</Text>
                     </View>
                     <View style={{ display: 'flex', flexDirection: 'row', gap: 8 }}>
-                        <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{dayjs(training.startedDate).format('DD/MM/YYYY')}</Text>
+                        <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{dayjs(training.startedDate).format('DD/MM/YYYY HH:mm')}</Text>
                         {
                             training.endedDate && <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{getDuration(training.startedDate, training.endedDate)}</Text>
                         }
