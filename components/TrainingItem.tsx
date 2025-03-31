@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 
 const TrainingItem = ({ training }: { training: Training }) => {
-    console.log(training);
+    
     const getDuration = (startedDate: string, endedDate: string) => {
         const started = dayjs(startedDate);
         const ended = dayjs(endedDate);
@@ -39,6 +39,9 @@ const TrainingItem = ({ training }: { training: Training }) => {
                             training.endedDate && <Text style={{ color: '#D9D9D9', fontSize: 13 }}>{getDuration(training.startedDate, training.endedDate)}</Text>
                         }
                     </View>
+                        {
+                           training.endedDate && training.calories === null && <Text style={{ color: '#ff6c37', fontSize: 13 }}>Remplissez le bilan</Text>
+                        }
                 </View>
                 <View>
                     {

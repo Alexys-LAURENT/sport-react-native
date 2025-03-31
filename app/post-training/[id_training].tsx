@@ -1,6 +1,6 @@
 import Slider from '@react-native-community/slider';
 import Constants from 'expo-constants';
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -48,6 +48,9 @@ export default function TrainingFeedbackScreen() {
         }
     };
     return (
+        <>
+      {/* Cette ligne désactive l'en-tête pour cette page spécifique */}
+       <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.container}>
             <Text style={styles.title}>Comment était votre séance ?</Text>
 
@@ -117,6 +120,7 @@ export default function TrainingFeedbackScreen() {
                 )}
             </TouchableOpacity>
         </View>
+        </>
     );
 }
 

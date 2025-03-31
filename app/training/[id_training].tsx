@@ -2,7 +2,7 @@ import { Map } from '@/components/map/Map';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TrainingContext } from '@/context/TrainingContext';
 import Constants from 'expo-constants';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -88,7 +88,7 @@ export default function TrainingScreen() {
     }, [training, isRealTime]);
 
     // Charger les données de l'entraînement
-    useEffect(() => {
+    useFocusEffect(() => {
         const fetchData = async () => {
             if (!trainingId) {
                 setLoading(false);
@@ -103,7 +103,19 @@ export default function TrainingScreen() {
                 }
                 
                 const data = await response.json();
+                if(!data.trainingInfo.difficulty && data.trainingInfo.endedDate){
+                    router.push({
+                        pathname: "/post-training/[id_training]",
+                        params: {
+                            id_training: trainingId || 0,
+                            date: data.trainingInfo.startedDate || new Date().toISOString()
+                        }
+                    })
+                }
                 setTraining(data.trainingInfo);
+                if(!data.trainingInfo.endedDate && !isTracking){
+                    startTrackingBasedOnType()
+                }
                 setIsRealTime(data.trainingInfo?.endedDate === "");
                 setWaypoints(data.waypoints || []);
             } catch (error) {
@@ -118,7 +130,7 @@ export default function TrainingScreen() {
         };
 
         fetchData();
-    }, [trainingId]);
+    });
 
     // Envoyer la position actuelle à l'API
     useEffect(() => {
@@ -195,6 +207,14 @@ export default function TrainingScreen() {
                         onPress: async () => {
                             await stopTrackingBasedOnType();
                             // Navigation vers la page post-entraînement
+
+                            await fetch(`${API_URL}api/trainings/end/${id_training}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }, 
+                            });
+
                             router.push({
                                 pathname: "/post-training/[id_training]",
                                 params: {
@@ -266,6 +286,10 @@ export default function TrainingScreen() {
                 <Text style={styles.loadingText}>Chargement de l'entraînement...</Text>
             </View>
         );
+    }
+
+    if(!training?.difficulty  && training?.endedDate){
+        return <></>
     }
 
     // Entraînement terminé (avec date de fin)
@@ -345,17 +369,23 @@ export default function TrainingScreen() {
                 
                 {/* Bouton fixe en bas de l'écran, hors de la ScrollView */}
                 <View style={styles.fixedButtonContainer}>
-                    <TouchableOpacity 
-                        style={[
-                            styles.actionButton, 
-                            isTracking ? styles.stopButton : styles.startButton
-                        ]} 
-                        onPress={handleTrainingAction}
-                    >
-                        <Text style={styles.actionButtonText}>
-                            {isTracking ? "Arrêter l'entraînement" : "Commencer l'entraînement"}
-                        </Text>
-                    </TouchableOpacity>
+                    {
+                        isTracking ? (
+                            <TouchableOpacity 
+                            style={[
+                                styles.actionButton, 
+                                isTracking ? styles.stopButton : styles.startButton
+                            ]} 
+                            onPress={handleTrainingAction}
+                        >
+                            <Text style={styles.actionButtonText}>
+                            Arrêter l'entraînement
+                            </Text>
+                        </TouchableOpacity>
+                        ) : (
+                            <ActivityIndicator size="large" color="#4CAF50" />
+                        )
+                    }
                 </View>
             </View>
         );
