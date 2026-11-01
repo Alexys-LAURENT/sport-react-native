@@ -1,0 +1,309 @@
+import CustomButton from '@/components/CustomButton';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from '@/components/ThemedView';
+import TrainingList from "@/components/TrainingList";
+import { TrainingContext } from '@/context/TrainingContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useContext, useState } from 'react';
+import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+
+// Training types data
+const trainingTypes = [
+  { id: 1, icon: '🏃‍♂️', label: 'running', color: '#FA795D' },
+  { id: 2, icon: '🚴‍♂️', label: 'vélo', color: '#85FA5D' },
+  { id: 3, icon: '🤸‍♂️', label: 'fitness', color: '#5DFAF0' },
+  { id: 4, icon: '🏋️‍♂️', label: 'Musculation', color: '#A25DFA' },
+  { id: 5, icon: '🏊‍♂️', label: 'Natation', color: '#FA5D82' },
+  { id: 6, icon: '💪', label: 'Autre', color: '#FFFFFF' }
+];
+
+export default function HomeScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const {isTracking} = useContext(TrainingContext);
+  const router = useRouter();
+  
+
+  useFocusEffect(
+    useCallback(() => {
+      // Cette fonction sera appelée chaque fois que l'écran est focalisé
+      setRefreshKey(prevKey => prevKey + 1);
+      
+      return () => {
+        // Nettoyage si nécessaire quand l'écran perd le focus
+      };
+    }, [])
+  );
+
+  // Utilisation du contexte de suivi
+  const { startTracking, setTrackingState } = useContext(TrainingContext);
+
+
+  const handleTrainingTypeSelect = async (type: any) => {
+    try {
+      // Get the user ID from AsyncStorage
+      const userId = await AsyncStorage.getItem('userId');
+      
+      if (!userId) {
+        Alert.alert('Erreur', 'Impossible de récupérer l\'identifiant utilisateur');
+        return;
+      }
+  
+      // Prepare the training data
+      const trainingData = {
+        idUser: parseInt(userId),
+        idTrainingType: type.id
+      };
+  
+  
+      // Send request to create training
+      const response = await fetch(`${API_URL}api/trainings/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(trainingData)
+      });
+  
+  
+      if (!response.ok) {
+        // Try to get error details
+        const errorBody = await response.text();
+        console.error('Error response body:', errorBody);
+        
+        throw new Error(`Erreur lors de la création de l'entraînement: ${errorBody}`);
+      }
+  
+      // Parse the response
+      const createdTraining = await response.json();
+
+      if (type.id === 1 || type.id === 2) {
+        startTracking();
+      } else {
+        setTrackingState(true);
+      }
+      
+  
+      // Close the modal
+      setModalVisible(false);
+  
+      // Navigate to the training screen with the new training ID
+      router.push({
+        pathname: "/training/[id_training]",
+        params: {
+          id_training: createdTraining.id,
+          trackingAlreadyInitialized:'true'
+        }
+        
+      });
+  
+    } catch (error:any) {
+      console.error('Erreur détaillée de création d\'entraînement:', error);
+      Alert.alert('Erreur', `Impossible de créer l'entraînement: ${error.message}`);
+    }
+  };
+
+  return (
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerImage={
+        <Image
+          source={require('@/assets/images/banner.png')}
+          style={styles.banner}
+        />
+      }
+    >
+      <ThemedView style={styles.mainContainer}>
+        <ThemedText style={styles.title} type="title">
+          Vos derniers entraînements 💪
+        </ThemedText>
+
+        <TrainingList limit={5} key={`homepage-rerfresh-key-${refreshKey}`} />
+
+        {/* Bouton Voir plus */}
+        <View style={{ marginTop: 10 }}>
+          <CustomButton onPress={() => router.push('/(tabs)/trainings')} variant="secondary" title="Voir plus" />
+        </View>
+
+        {/* Section motivation */}
+        <ThemedText style={styles.subtitle} type="title">
+          Ne lâchez rien !
+        </ThemedText>
+
+        {/* Bouton Commencer l'entraînement */}
+        <CustomButton onPress={() => !isTracking ? setModalVisible(true) : alert("Un entraînement est déjà en cours")} variant="primary" title="Commencer l'entrainement !" />
+
+        {/* Modal de sélection de type d'entraînement */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <ThemedText style={styles.modalTitle} type="title">
+                Choisissez un type d'entraînement
+              </ThemedText>
+              
+              <View style={styles.trainingTypeGrid}>
+                {trainingTypes.map((type) => (
+                  <TouchableOpacity 
+                    key={type.id}
+                    style={[
+                      styles.trainingTypeButton, 
+                      { backgroundColor: type.color }
+                    ]}
+                    onPress={() => handleTrainingTypeSelect(type)}
+                  >
+                    <Text style={styles.trainingTypeIcon}>{type.icon}</Text>
+                    <Text style={styles.trainingTypeLabel}>{type.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Annuler</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ThemedView>
+    </ParallaxScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    paddingTop: 10,
+    marginHorizontal: -10,
+  },
+  
+  banner: {
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+
+  title: {
+    alignSelf: 'flex-start',
+    fontSize: 21,
+    fontWeight: 'bold',
+    paddingBottom: 20,
+    color: "#FFF"
+  },
+
+  subtitle: {
+    alignSelf: 'flex-start',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+    color: "#FFF"
+  },
+
+  startButton: {
+    width: "100%", 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+    paddingVertical: 15,
+    borderRadius: 10,
+    backgroundColor: "#C6FF00",
+  },
+
+  startButtonText: {
+    color: "black",
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  seeMoreButton: {
+    width: "100%",
+    backgroundColor: "#222",
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: "center",
+  },
+
+  seeMoreText: {
+    color: "#C6FF00",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#1E1E1E',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: 'white',
+  },
+
+  trainingTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+
+  trainingTypeButton: {
+    width: '45%',
+    margin: 5,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  trainingTypeIcon: {
+    fontSize: 40,
+    marginBottom: 10,
+  },
+
+  trainingTypeLabel: {
+    color: 'black',
+    fontWeight: 'bold',
+  },
+
+  closeButton: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
